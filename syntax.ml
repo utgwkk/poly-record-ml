@@ -5,3 +5,4 @@ type exp =
   | Int of int
   | Let of id * exp * exp
   | Record of (id * exp) list
+  | RecordGet of id * exp

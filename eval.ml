@@ -1,6 +1,7 @@
 open Syntax
 
 exception Runtime_error of string
+exception Field_not_found of id
 
 let runtime_error s = raise (Runtime_error s)
 
@@ -23,3 +24,12 @@ let rec eval env = function
   | Record xs ->
       let xs' = List.sort compare xs in
       VRecord (List.map (fun (k, e) -> (k, eval env e)) xs')
+  | RecordGet (f, e) ->
+      let v = eval env e in
+      begin match v with
+        | VRecord xs -> begin
+          try List.assoc f xs
+          with Not_found -> raise (Field_not_found f)
+        end
+        | _ -> runtime_error "Not a record type"
+      end

@@ -18,6 +18,7 @@ rule main = parse
   }
 | '=' { EQ }
 | ',' { COMMA }
+| '.' { DOT }
 | '(' { LPAREN }
 | ')' { RPAREN }
 | '{' { LMPAREN }

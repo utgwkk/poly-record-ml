@@ -21,3 +21,9 @@ setup.log
 
 # Merlin configuring file for Vim and Emacs
 .merlin
+
+# OCamlMakefile output file
+._d/
+
+# output file
+prog

@@ -1,5 +1,9 @@
 open Syntax
 
+exception Runtime_error of string
+
+let runtime_error s = raise (Runtime_error s)
+
 type value =
   | VInt of int
   | VRecord of (id * value) list

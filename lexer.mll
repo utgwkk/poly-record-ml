@@ -17,6 +17,9 @@ rule main = parse
     with Not_found -> ID id
   }
 | '=' { EQ }
+| ',' { COMMA }
 | '(' { LPAREN }
 | ')' { RPAREN }
+| '{' { LMPAREN }
+| '}' { RMPAREN }
 | eof { exit 1 }

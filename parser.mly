@@ -7,6 +7,8 @@
 %token <int> INT
 %token LPAREN RPAREN
 %token LET EQ IN
+%token LMPAREN RMPAREN (* { } *)
+%token COMMA
 
 %start main
 %type <Syntax.exp> main
@@ -25,5 +27,10 @@ LetExpr:
 AExpr:
   ID { Var $1 }
 | INT { Int $1 }
+| LMPAREN rb=RecordBody RMPAREN { Record rb }
 | LPAREN e=Expr RPAREN { e }
+
+RecordBody:
+| k=ID EQ e=Expr COMMA r=RecordBody { (k, e) :: r }
+| k=ID EQ e=Expr { [(k, e)] }
   

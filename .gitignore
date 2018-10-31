@@ -24,6 +24,10 @@ setup.log
 
 # OCamlMakefile output file
 ._d/
+._ncdi/
+lexer.ml
+parser.ml
+parser.mli
 
 # output file
 prog

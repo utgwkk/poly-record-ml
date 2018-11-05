@@ -40,6 +40,12 @@ let rec eval env = function
       let v1 = eval env e1 in
       let v2 = eval env e2 in
       eval_binop op v1 v2
+  | IfThenElse (e1, e2, e3) ->
+      let vc = eval env e1 in
+      begin match vc with
+      | VBool b -> if b then eval env e2 else eval env e3
+      | _ -> runtime_error (string_of_value vc ^ " is not a boolean value")
+      end
   | Fun (x, e) ->
       VFun (x, e, env)
   | App (e1, e2) ->

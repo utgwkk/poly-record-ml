@@ -7,6 +7,9 @@
     ("true", TRUE);
     ("false", FALSE);
     ("modify", MODIFY);
+    ("if", IF);
+    ("then", THEN);
+    ("else", ELSE);
   ]
   |> List.sort compare
 }

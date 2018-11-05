@@ -14,6 +14,7 @@
 %token FUN RARROW (* -> *)
 %token TRUE FALSE
 %token MODIFY
+%token IF THEN ELSE
 
 %start main
 %type <Syntax.exp> main
@@ -27,6 +28,10 @@ Expr:
 
 LetExpr:
   LET x=ID EQ e1=Expr IN e2=Expr { Let (x, e1, e2) }
+| IfExpr { $1 }
+
+IfExpr:
+  IF e1=Expr THEN e2=Expr ELSE e3=Expr { IfThenElse (e1, e2, e3) }
 | FunExpr { $1 }
 
 FunExpr:

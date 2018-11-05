@@ -12,7 +12,7 @@
 }
 
 rule main = parse
-| [' ' '\t']+ { main lexbuf }
+| [' ' '\t' '\r' '\n']+ { main lexbuf }
 | ";;" { SEMISEMI }
 | '-'? ['0'-'9']+ { INT (int_of_string (Lexing.lexeme lexbuf)) }
 | ['a'-'z'] ['a'-'z']* {

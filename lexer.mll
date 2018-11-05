@@ -3,6 +3,9 @@
   let reservedWords = [
     ("let", LET);
     ("in", IN);
+    ("fun", FUN);
+    ("true", TRUE);
+    ("false", FALSE);
     ("modify", MODIFY);
   ]
   |> List.sort compare
@@ -17,6 +20,9 @@ rule main = parse
     try List.assoc id reservedWords
     with Not_found -> ID id
   }
+| '+' { PLUS }
+| '*' { MULT }
+| '<' { LT }
 | '=' { EQ }
 | ',' { COMMA }
 | '.' { DOT }
@@ -24,4 +30,5 @@ rule main = parse
 | ')' { RPAREN }
 | '{' { LMPAREN }
 | '}' { RMPAREN }
+| "->" { RARROW }
 | eof { exit 1 }

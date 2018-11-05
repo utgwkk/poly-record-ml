@@ -10,6 +10,9 @@
 %token LMPAREN RMPAREN (* { } *)
 %token COMMA
 %token DOT
+%token PLUS MULT LT
+%token FUN RARROW (* -> *)
+%token TRUE FALSE
 %token MODIFY
 
 %start main
@@ -24,11 +27,36 @@ Expr:
 
 LetExpr:
   LET x=ID EQ e1=Expr IN e2=Expr { Let (x, e1, e2) }
+| FunExpr { $1 }
+
+FunExpr:
+  FUN x=ID RARROW e=Expr { Fun (x, e) }
+| BinOpExpr { $1 }
+
+BinOpExpr:
+  LTExpr { $1 }
+
+LTExpr:
+  e1=PlusExpr LT e2=PlusExpr { BinOp (Lt, e1, e2) }
+| PlusExpr { $1 }
+
+PlusExpr:
+  e1=PlusExpr PLUS e2=MultExpr { BinOp (Plus, e1, e2)}
+| MultExpr { $1 }
+
+MultExpr:
+  e1=MultExpr MULT e2=AExpr { BinOp (Mult, e1, e2) }
+| AppExpr { $1 }
+
+AppExpr:
+  e1=AppExpr e2=AExpr { App (e1, e2) }
 | AExpr { $1 }
 
 AExpr:
   ID { Var $1 }
 | INT { Int $1 }
+| TRUE { Bool true }
+| FALSE { Bool false }
 | e=AExpr DOT f=ID { RecordGet (f, e) }
 | LMPAREN rb=RecordBody RMPAREN { Record rb }
 | MODIFY LPAREN e1=Expr COMMA f=ID COMMA e2=Expr RPAREN { RecordModify (e1, f, e2) }

@@ -10,6 +10,7 @@
 %token LMPAREN RMPAREN (* { } *)
 %token COMMA
 %token DOT
+%token MODIFY
 
 %start main
 %type <Syntax.exp> main
@@ -30,6 +31,7 @@ AExpr:
 | INT { Int $1 }
 | e=AExpr DOT f=ID { RecordGet (f, e) }
 | LMPAREN rb=RecordBody RMPAREN { Record rb }
+| MODIFY LPAREN e1=Expr COMMA f=ID COMMA e2=Expr RPAREN { RecordModify (e1, f, e2) }
 | LPAREN e=Expr RPAREN { e }
 
 RecordBody:

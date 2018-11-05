@@ -41,3 +41,10 @@ let rec eval env = function
         end
         | _ -> runtime_error "Not a record type"
       end
+  | RecordModify (e1, f, e2) ->
+      let v1 = eval env e1 in
+      let v2 = eval env e2 in
+      begin match v1 with
+        | VRecord xs -> VRecord (List.map (fun (l, v) -> if f = l then (l, v2) else (l, v)) xs)
+        | _ -> runtime_error "Not a record type"
+      end

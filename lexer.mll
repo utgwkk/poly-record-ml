@@ -3,6 +3,7 @@
   let reservedWords = [
     ("let", LET);
     ("in", IN);
+    ("modify", MODIFY);
   ]
   |> List.sort compare
 }

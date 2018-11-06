@@ -24,6 +24,7 @@ setup.log
 
 # OCamlMakefile output file
 ._d/
+._bcdi/
 ._ncdi/
 
 # output file

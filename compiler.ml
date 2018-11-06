@@ -31,6 +31,16 @@ let rec tycon (Lld.Forall (xs, t)) =
   | [] -> Llp.Forall (xs', monotycon t)
   | _ -> Llp.Forall (xs', Llp.TIdxFun (idxsets, monotycon t))
 
+let __counter = ref 1
+
+let reset_counter () =
+  __counter := 1
+
+let fresh_idxvar () =
+  let rval = !__counter in
+  __counter := !__counter + 1;
+  rval
+
 let rec compile (lbenv : Llp.lbenv) tyenv = function
   | Lld.EInt i -> Llp.EInt i
   | Lld.EAbs (x, t, e) ->
@@ -42,6 +52,22 @@ let rec compile (lbenv : Llp.lbenv) tyenv = function
       let e1' = compile lbenv tyenv e1 in
       let e2' = compile lbenv tyenv e2 in
       Llp.EApp (e1', e2')
+  | Lld.EPolyGen (e, (Lld.Forall (xs, _))) ->
+      let xs' = idxset xs in
+      let label_tv_idxvar_tuple_list =
+        List.map (fun (l, t) -> (l, t, fresh_idxvar ())) xs'
+      in
+      let lbenv' =
+        List.fold_left
+        (fun env (l, t, i) -> Environment.extend (l, t) (Llp.IVar i) env)
+        lbenv label_tv_idxvar_tuple_list
+      in
+      let e' = compile lbenv' tyenv e in
+      let fresh_idxvars =
+        List.map (fun (_, _, i) -> i) label_tv_idxvar_tuple_list
+        |> List.rev
+      in
+      List.fold_left (fun e idxv -> Llp.EIdxAbs (idxv, e)) e' fresh_idxvars
   | Lld.ELet (x, pt, e1, e2) ->
       let pt' = tycon pt in
       let e1' = compile lbenv tyenv e1 in
@@ -77,4 +103,6 @@ let rec compile (lbenv : Llp.lbenv) tyenv = function
       Llp.EArrayModify (e1', idx, e2')
 
 (* entrypoint *)
-let start exp = compile Environment.empty Environment.empty exp
+let start exp =
+  reset_counter ();
+  compile Environment.empty Environment.empty exp

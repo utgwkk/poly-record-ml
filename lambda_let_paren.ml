@@ -1,4 +1,4 @@
-type id = Syntax.id
+open Syntax
 
 type idxvar = int
 

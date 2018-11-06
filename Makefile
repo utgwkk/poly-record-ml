@@ -8,6 +8,8 @@ SOURCES = \
 					environment.ml environment.mli \
 					evaluator.ml \
 					lambda_let_paren.ml \
+					lambda_let_dot.ml \
+					compiler.ml \
 					$(TESTS)
 RESULT = test
 

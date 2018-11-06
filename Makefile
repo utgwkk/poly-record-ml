@@ -1,5 +1,6 @@
 PACKS = oUnit
 TESTS = \
+				compiler_test.ml \
 				evaluator_test.ml \
 				test.ml
 SOURCES = \

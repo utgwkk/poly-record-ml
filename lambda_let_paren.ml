@@ -25,3 +25,5 @@ type value =
   | VIdxAbs of idx * exp
 
 and env = (id, value) Environment.t
+
+and idxenv = (idxvar, idx) Environment.t

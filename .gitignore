@@ -30,4 +30,5 @@ parser.ml
 parser.mli
 
 # output file
-prog
+test
+*.log

@@ -55,3 +55,5 @@ type value =
 and env = (id, value) Environment.t
 
 and idxenv = (idxvar, idx) Environment.t
+
+type lbenv = (idxty, idx) Environment.t

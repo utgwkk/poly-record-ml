@@ -15,14 +15,14 @@ type exp =
   | EArray of exp list
   | EArrayGet of exp * idx
   | EArrayModify of exp * idx * exp
-  | EIdxAbs of idx * exp
+  | EIdxAbs of idxvar * exp
   | EIdxApp of exp * idx
 
 type value =
   | VInt of int
   | VProc of id * exp * env
   | VArray of value array
-  | VIdxAbs of idx * exp
+  | VIdxAbs of idxvar * exp
 
 and env = (id, value) Environment.t
 

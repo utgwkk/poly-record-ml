@@ -24,7 +24,3 @@ type exp =
   | ERecord of (label * exp) list
   | ERecordGet of exp * ty * label
   | ERecordModify of exp * ty * label * exp
-
-type tyenv = (id, polyty) Environment.t
-
-type lbenv = (label, idx) Environment.t

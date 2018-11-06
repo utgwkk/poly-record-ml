@@ -5,6 +5,45 @@ module Lld = Lambda_let_dot
 module Llp = Lambda_let_paren
 
 let tests = "Compiler_test">:::[
+  "tycon_test">:::[
+    "no_bound">::(fun ctxt ->
+      let input = Lld.Forall ([], TInt) in
+      let expected = Llp.Forall ([], TInt) in
+      assert_equal expected (tycon input)
+    );
+    "universal">::(fun ctxt ->
+      let input = Lld.Forall ([1, KUniv], TInt) in
+      let expected = Llp.Forall ([1, KUniv], TInt) in
+      assert_equal expected (tycon input)
+    );
+    "example_in_paper">::(fun ctxt ->
+      (* forall t2 :: {{a:int, b:int}}.
+       * forall t3 :: {{a:t2}}.
+       * t2 -> t3
+       * =>
+       * forall t2 :: {{a:int, b:int}}.
+       * forall t3 :: {{a:t2}}.
+       * idx(a, t2) ==> idx(b, t2) ==> idx(a, t3) ==> t2 -> t3
+       * *)
+      let input =
+        Lld.Forall ([
+          (2, Lld.KRecord [("a", TInt); ("b", TInt)]);
+          (3, Lld.KRecord [("a", TVar 2)])
+        ], Lld.TFun (Lld.TVar 2, Lld.TVar 3))
+      in
+      let expected =
+        Llp.Forall ([
+          (2, Llp.KRecord [("a", TInt); ("b", TInt)]);
+          (3, Llp.KRecord [("a", TVar 2)])
+        ],
+        Llp.TIdxFun ([
+          ("a", TVar 2); ("b", TVar 2); ("a", TVar 3)
+        ], Llp.TFun (TVar 2, TVar 3))
+        )
+      in
+      assert_equal expected (tycon input)
+    );
+  ];
   "compile_test">:::[
     "compile_0_to_0">::(fun ctxt ->
       let input = Lld.EInt 0 in

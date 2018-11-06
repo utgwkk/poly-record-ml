@@ -50,4 +50,22 @@ let tests = "Evaluator_test">:::[
 		let expected = VInt 2 in
 		assert_equal expected (Evaluator.start exp)
   );
+  "idxabs">::(fun ctxt ->
+    (* ifun i1 -> 2 *)
+		let exp = EIdxAbs (1, EInt 2) in
+		let expected = VIdxAbs (1, EInt 2) in
+		assert_equal expected (Evaluator.start exp)
+  );
+  "idxabs_app_nonsense">::(fun ctxt ->
+    (* (ifun i1 -> 2) 1 *)
+		let exp = EIdxApp (EIdxAbs (1, EInt 2), INat 1) in
+		let expected = VInt 2 in
+		assert_equal expected (Evaluator.start exp)
+  );
+  "idxabs_app_array">::(fun ctxt ->
+    (* (ifun i1 -> {3, 5, 7}[i1]) 1 *)
+		let exp = EIdxApp (EIdxAbs (1, EArrayGet (EArray [EInt 3; EInt 5; EInt 7], IVar 1)), INat 1) in
+		let expected = VInt 5 in
+		assert_equal expected (Evaluator.start exp)
+  );
 ]

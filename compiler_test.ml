@@ -103,5 +103,41 @@ let tests = "Compiler_test">:::[
       ) in
       assert_equal expected (start input)
     );
+    "compile_polygen_nonsense">::(fun ctxt ->
+      (* Poly(1, forall t1::U. forall t2::U. forall t3::U.int)
+       * => 1
+       * *)
+      let input = Lld.EPolyGen (
+        Lld.EInt 1,
+        Lld.Forall ([1, KUniv; 2, KUniv; 3, KUniv], TInt)
+      ) in
+      let expected = Llp.EInt 1 in
+      assert_equal expected (start input)
+    );
+    "compile_polygen_record">::(fun ctxt ->
+      (* Poly((1, forall t1::{{a:int, b:int}}.int)
+       * => ifun i1 -> ifun i2 -> 1
+       * *)
+      let input = Lld.EPolyGen (
+        Lld.EInt 1,
+        Lld.Forall ([1, KRecord [("a", TInt); ("b", TInt)]], TInt)
+      ) in
+      let expected = Llp.EIdxAbs (1, Llp.EIdxAbs (2, Llp.EInt 1)) in
+      assert_equal expected (start input)
+    );
+    "compile_polygen_record_nested">::(fun ctxt ->
+      (* Poly((1, forall t1::{{a:int, b:int}}.forall t2::{{a:int}}.int)
+       * => ifun i1 -> ifun i2 -> ifun i3 -> 1
+       * *)
+      let input = Lld.EPolyGen (
+        Lld.EInt 1,
+        Lld.Forall ([
+          1, KRecord [("a", TInt); ("b", TInt)];
+          2, KRecord [("a", TInt)];
+        ], TInt)
+      ) in
+      let expected = Llp.EIdxAbs (1, Llp.EIdxAbs (2, Llp.EIdxAbs (3, Llp.EInt 1))) in
+      assert_equal expected (start input)
+    );
   ];
 ]

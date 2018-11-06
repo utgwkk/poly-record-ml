@@ -30,3 +30,4 @@ setup.log
 # output file
 test
 *.log
+*.cache

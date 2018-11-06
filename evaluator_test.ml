@@ -33,14 +33,14 @@ let tests = "Evaluator_test">:::[
 		assert_equal expected (Evaluator.start exp)
   );
   "access_array">::(fun ctxt ->
-		(* {3, 5, 7}[1] *)
-		let exp = EArrayGet (EArray [EInt 3; EInt 5; EInt 7], INat 1) in
+		(* {3, 5, 7}[2] *)
+		let exp = EArrayGet (EArray [EInt 3; EInt 5; EInt 7], INat 2) in
 		let expected = VInt 5 in
 		assert_equal expected (Evaluator.start exp)
   );
   "modify_array">::(fun ctxt ->
-		(* modify({3, 5, 7}, 1, 100) *)
-		let exp = EArrayModify (EArray [EInt 3; EInt 5; EInt 7], INat 1, EInt 100) in
+		(* modify({3, 5, 7}, 2, 100) *)
+		let exp = EArrayModify (EArray [EInt 3; EInt 5; EInt 7], INat 2, EInt 100) in
 		let expected = VArray [|VInt 3; VInt 100; VInt 7|] in
 		assert_equal expected (Evaluator.start exp)
   );
@@ -63,8 +63,8 @@ let tests = "Evaluator_test">:::[
 		assert_equal expected (Evaluator.start exp)
   );
   "idxabs_app_array">::(fun ctxt ->
-    (* (ifun i1 -> {3, 5, 7}[i1]) 1 *)
-		let exp = EIdxApp (EIdxAbs (1, EArrayGet (EArray [EInt 3; EInt 5; EInt 7], IVar 1)), INat 1) in
+    (* (ifun i1 -> {3, 5, 7}[i1]) 2 *)
+		let exp = EIdxApp (EIdxAbs (1, EArrayGet (EArray [EInt 3; EInt 5; EInt 7], IVar 1)), INat 2) in
 		let expected = VInt 5 in
 		assert_equal expected (Evaluator.start exp)
   );

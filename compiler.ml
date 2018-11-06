@@ -31,7 +31,7 @@ let rec tycon (Lld.Forall (xs, t)) =
   | [] -> Llp.Forall (xs', monotycon t)
   | _ -> Llp.Forall (xs', Llp.TIdxFun (idxsets, monotycon t))
 
-let rec compile lbenv tyenv = function
+let rec compile (lbenv : Llp.lbenv) tyenv = function
   | Lld.EInt i -> Llp.EInt i
   | Lld.EAbs (x, t, e) ->
       let t' = Llp.Forall ([], monotycon t) in

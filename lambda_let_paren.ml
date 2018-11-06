@@ -11,7 +11,8 @@ type ty =
   | TInt
   | TFun of ty * ty
   | TRecord of (label * ty) list
-  | TIdxFun of (label * ty) list * ty
+  | TIdxFun of idxty list * ty
+and idxty = label * ty
 and kind =
   | KUniv
   | KRecord of (label * ty) list

@@ -1,10 +1,6 @@
-type id = Syntax.id
+open Syntax
 
 type idx = Lambda_let_paren.idx
-
-type tyvar = int
-
-type label = string
 
 type ty =
   | TVar of tyvar

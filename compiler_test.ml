@@ -139,5 +139,25 @@ let tests = "Compiler_test">:::[
       let expected = Llp.EIdxAbs (1, Llp.EIdxAbs (2, Llp.EIdxAbs (3, Llp.EInt 1))) in
       assert_equal expected (start input)
     );
+    "compile_let_and_polyinst">::(fun ctxt ->
+      (* let (x:forall t1::{{a:int, b:int}}.t1) = {a=1, b=2}
+       * in x ({a:int, b:int})
+       * => x 1 2
+       * *)
+      let input = Lld.ELet (
+        "x",
+        Lld.Forall ([
+          1, KRecord [("a", TInt); ("b", TInt)];
+        ], TVar 1),
+        Lld.ERecord [("a", EInt 1); ("b", EInt 2)],
+        Lld.EPolyInst ("x", [TRecord [("a", TInt); ("b", TInt)]])
+      ) in
+      let expected = Llp.ELet (
+        "x",
+        EArray [EInt 1; EInt 2],
+        Llp.EIdxApp (Llp.EIdxApp (EVar "x", INat 1), INat 2))
+      in
+      assert_equal expected (start input)
+    );
   ];
 ]

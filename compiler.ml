@@ -42,6 +42,16 @@ let fresh_idxvar () =
   rval
 
 let rec compile (lbenv : Llp.lbenv) tyenv = function
+  | Lld.EPolyInst (x, xs) ->
+      let (Llp.Forall (ys, Llp.TIdxFun (zs, _))) = Environment.lookup x tyenv in
+      let subs = List.map2 (fun (tv, _) ty -> (tv, monotycon ty)) ys xs in
+      let idxs = List.map (fun (l, t) ->
+        let t' = Llp.substitute subs t in
+        try Llp.INat (Llp.idx_value l t')
+        with Llp.Undefined_index_value ->
+          Environment.lookup (l, t') lbenv
+      ) zs in
+      List.fold_left (fun e idx -> Llp.EIdxApp (e, idx)) (Llp.EVar x) idxs
   | Lld.EInt i -> Llp.EInt i
   | Lld.EAbs (x, t, e) ->
       let t' = Llp.Forall ([], monotycon t) in

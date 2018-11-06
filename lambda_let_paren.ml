@@ -19,6 +19,20 @@ and kind =
 
 type polyty = Forall of (tyvar * kind) list * ty
 
+type subst = (tyvar * ty) list
+
+let substitute subs t =
+  let rec inner (tv, t) = function
+    | TVar tv' -> if tv = tv' then t else TVar tv'
+    | TInt -> TInt
+    | TFun (t1, t2) -> TFun (inner (tv, t) t1, inner (tv, t) t2)
+    | TRecord xs ->
+        let xs' = List.map (fun (l, t') -> (l, inner (tv, t') t)) xs in
+        TRecord xs'
+    | TIdxFun (xs, t') ->
+        TIdxFun (xs, inner (tv, t) t')
+  in List.fold_right inner subs t
+
 exception Label_not_found of label
 exception Undefined_index_value
 exception Not_a_record_type

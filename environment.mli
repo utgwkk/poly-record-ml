@@ -1,9 +1,9 @@
-type 'a t
+type ('a, 'b) t
 
 exception Not_bound
 
-val empty : 'a t
-val extend : Syntax.id -> 'a -> 'a t -> 'a t
-val lookup : Syntax.id -> 'a t -> 'a
-val map : ('a -> 'b) -> 'a t -> 'b t
-val fold_right : ('a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+val empty : ('a, 'b) t
+val extend : 'a -> 'b -> ('a, 'b) t -> ('a, 'b) t
+val lookup : 'a -> ('a, 'b) t -> 'b
+val map : ('b -> 'c) -> ('a, 'b) t -> ('a, 'c) t
+val fold_right : ('b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c

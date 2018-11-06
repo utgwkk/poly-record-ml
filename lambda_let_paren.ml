@@ -24,4 +24,4 @@ type value =
   | VArray of value array
   | VIdxAbs of idx * exp
 
-and env = value Environment.t
+and env = (id, value) Environment.t

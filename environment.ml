@@ -1,4 +1,4 @@
-type 'a t = (Syntax.id * 'a) list
+type ('a, 'b) t = ('a * 'b) list
 
 exception Not_bound
 

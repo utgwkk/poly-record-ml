@@ -33,3 +33,4 @@ parser.mli
 # output file
 test
 *.log
+*.cache

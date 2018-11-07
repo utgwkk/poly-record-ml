@@ -82,8 +82,7 @@ let rec compile (lbenv : Llp.lbenv) tyenv = function
       in
       let e' = compile lbenv' tyenv e in
       let fresh_idxvars =
-        List.map (fun (_, _, i) -> i) label_tv_idxvar_tuple_list
-        |> List.rev
+        List.rev_map (fun (_, _, i) -> i) label_tv_idxvar_tuple_list
       in
       List.fold_left (fun e idxv -> Llp.EIdxAbs (idxv, e)) e' fresh_idxvars
   | Lld.ELet (x, pt, e1, e2) ->

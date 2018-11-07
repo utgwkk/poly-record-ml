@@ -11,6 +11,6 @@ SOURCES = \
 RESULT = test
 
 test: bc
-	./test
+	./$(RESULT); rm ./$(RESULT)
 
 -include OCamlMakefile

@@ -3,7 +3,8 @@ module Llp = Lambda_let_paren
 
 let idxset_kind tv = function
   | Lld.KUniv -> []
-  | Lld.KRecord xs -> List.map (fun (l, _) -> (l, Llp.TVar tv)) xs
+  | Lld.KRecord xs ->
+      List.map (fun (l, _) -> (l, Llp.TVar tv)) xs
 
 let idxset xs =
   let rec inner = function
@@ -16,17 +17,28 @@ let rec monotycon = function
   | Lld.TInt -> Llp.TInt
   | Lld.TFun (t1, t2) -> Llp.TFun (monotycon t1, monotycon t2)
   | Lld.TRecord ts ->
-      let ts' = List.map (fun (l, t) -> (l, monotycon t)) ts |> List.sort compare in
+      let ts' =
+        ts
+        |> List.map (fun (l, t) -> (l, monotycon t))
+        |> List.sort compare
+      in
       Llp.TRecord ts'
 
 let kcon = function
   | Lld.KUniv -> Llp.KUniv
   | Lld.KRecord xs ->
-      Llp.KRecord (List.map (fun (l, t) -> (l, monotycon t)) xs)
+      let xs' =
+        xs
+        |> List.map (fun (l, t) -> (l, monotycon t))
+      in
+      Llp.KRecord xs'
 
 let rec tycon (Lld.Forall (xs, t)) =
   let idxsets = idxset xs in
-  let xs' = List.map (fun (tv, k) -> (tv, kcon k)) xs in
+  let xs' =
+    xs
+    |> List.map (fun (tv, k) -> (tv, kcon k))
+  in
   match idxsets with
   | [] -> Llp.Forall (xs', monotycon t)
   | _ -> Llp.Forall (xs', Llp.TIdxFun (idxsets, monotycon t))
@@ -46,14 +58,18 @@ let rec compile (lbenv : Llp.lbenv) tyenv = function
       let (Llp.Forall (ys, t)) = Environment.lookup x tyenv in
       begin match t with
         | Llp.TIdxFun (zs, _) ->
-            let subs = List.map2 (fun (tv, _) ty -> (tv, monotycon ty)) ys xs in
+            let subs =
+              List.map2 (fun (tv, _) ty -> (tv, monotycon ty)) ys xs
+            in
             let idxs = List.map (fun (l, t) ->
               let t' = Llp.substitute subs t in
               try Llp.INat (Llp.idx_value l t')
               with Llp.Undefined_index_value ->
                 Environment.lookup (l, t') lbenv
-            ) zs in
-            List.fold_left (fun e idx -> Llp.EIdxApp (e, idx)) (Llp.EVar x) idxs
+            ) zs
+            in
+            idxs
+            |> List.fold_left (fun e idx -> Llp.EIdxApp (e, idx)) (Llp.EVar x)
         | _ ->
             (* Since there is no polymorphic instantiation
              * just convert to a variable expression
@@ -84,7 +100,8 @@ let rec compile (lbenv : Llp.lbenv) tyenv = function
       let fresh_idxvars =
         List.rev_map (fun (_, _, i) -> i) label_tv_idxvar_tuple_list
       in
-      List.fold_left (fun e idxv -> Llp.EIdxAbs (idxv, e)) e' fresh_idxvars
+      fresh_idxvars
+      |> List.fold_left (fun e idxv -> Llp.EIdxAbs (idxv, e)) e'
   | Lld.ELet (x, pt, e1, e2) ->
       let pt' = tycon pt in
       let e1' = compile lbenv tyenv e1 in
@@ -101,20 +118,18 @@ let rec compile (lbenv : Llp.lbenv) tyenv = function
   | Lld.ERecordGet (e1, t, l) ->
       let e1' = compile lbenv tyenv e1 in
       let t' = monotycon t in
-      let idx = begin
+      let idx =
         try Llp.INat (Llp.idx_value l t')
         with Llp.Undefined_index_value ->
           Environment.lookup (l, t') lbenv
-      end
       in Llp.EArrayGet (e1', idx)
   | Lld.ERecordModify (e1, t, l, e2) ->
       let e1' = compile lbenv tyenv e1 in
       let t' = monotycon t in
-      let idx = begin
+      let idx =
         try Llp.INat (Llp.idx_value l t')
         with Llp.Undefined_index_value ->
           Environment.lookup (l, t') lbenv
-      end
       in
       let e2' = compile lbenv tyenv e2 in
       Llp.EArrayModify (e1', idx, e2')

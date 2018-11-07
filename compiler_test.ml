@@ -45,35 +45,35 @@ let tests = "Compiler_test">:::[
     );
   ];
   "compile_test">:::[
-    "compile_0_to_0">::(fun ctxt ->
+    "0 => 0">::(fun ctxt ->
       let input = Lld.EInt 0 in
       let expected = Llp.EInt 0 in
       assert_equal expected (start input)
     );
-    "compile_1_to_1">::(fun ctxt ->
+    "1 => 1">::(fun ctxt ->
       let input = Lld.EInt 1 in
       let expected = Llp.EInt 1 in
       assert_equal expected (start input)
     );
-    "compile_1_abs">::(fun ctxt ->
+    "1_abs">::(fun ctxt ->
       (* (fun x:int -> 1) => (fun x -> 1) *)
       let input = Lld.EAbs ("x", TInt, EInt 1) in
       let expected = Llp.EAbs ("x", EInt 1) in
       assert_equal expected (start input)
     );
-    "compile_1_abs_app">::(fun ctxt ->
+    "1_abs_app">::(fun ctxt ->
       (* (fun x:int -> 1) 2 => (fun x -> 1) 2 *)
       let input = Lld.EApp (EAbs ("x", TInt, EInt 1), EInt 2) in
       let expected = Llp.EApp (EAbs ("x", EInt 1), EInt 2) in
       assert_equal expected (start input)
     );
-    "compile_record">::(fun ctxt ->
+    "record_construct">::(fun ctxt ->
       (* {c=1, b=2, a=3} => {3, 2, 1} *)
       let input = Lld.ERecord [("c", EInt 1); ("b", EInt 2); ("a", EInt 3)] in
       let expected = Llp.EArray [EInt 3; EInt 2; EInt 1] in
       assert_equal expected (start input)
     );
-    "compile_record_access">::(fun ctxt ->
+    "record_access">::(fun ctxt ->
       (* ({c=1, b=2, a=3}:{c:int, b:int: a:int}).a
        * => {3, 2, 1}[1] *)
       let input = Lld.ERecordGet (
@@ -87,7 +87,7 @@ let tests = "Compiler_test">:::[
       ) in
       assert_equal expected (start input)
     );
-    "compile_record_modification">::(fun ctxt ->
+    "record_modification">::(fun ctxt ->
       (* modify({c=1, b=2, a=3}:{c:int, b:int: a:int}, a, 100)
        * => modify({3, 2, 1}, 1, 100) *)
       let input = Lld.ERecordModify (
@@ -103,7 +103,7 @@ let tests = "Compiler_test">:::[
       ) in
       assert_equal expected (start input)
     );
-    "compile_polygen_nonsense">::(fun ctxt ->
+    "polygen_nonsense">::(fun ctxt ->
       (* Poly(1, forall t1::U. forall t2::U. forall t3::U.int)
        * => 1
        * *)
@@ -114,7 +114,7 @@ let tests = "Compiler_test">:::[
       let expected = Llp.EInt 1 in
       assert_equal expected (start input)
     );
-    "compile_polygen_record">::(fun ctxt ->
+    "polygen_record">::(fun ctxt ->
       (* Poly((1, forall t1::{{a:int, b:int}}.int)
        * => ifun i1 -> ifun i2 -> 1
        * *)
@@ -125,7 +125,7 @@ let tests = "Compiler_test">:::[
       let expected = Llp.EIdxAbs (1, Llp.EIdxAbs (2, Llp.EInt 1)) in
       assert_equal expected (start input)
     );
-    "compile_polygen_record_nested">::(fun ctxt ->
+    "polygen_record_nested">::(fun ctxt ->
       (* Poly((1, forall t1::{{a:int, b:int}}.forall t2::{{a:int}}.int)
        * => ifun i1 -> ifun i2 -> ifun i3 -> 1
        * *)
@@ -139,7 +139,7 @@ let tests = "Compiler_test">:::[
       let expected = Llp.EIdxAbs (1, Llp.EIdxAbs (2, Llp.EIdxAbs (3, Llp.EInt 1))) in
       assert_equal expected (start input)
     );
-    "compile_let_and_polyinst">::(fun ctxt ->
+    "let_and_polyinst">::(fun ctxt ->
       (* let (x:forall t1::{{a:int, b:int}}.t1) = {a=1, b=2}
        * in x ({a:int, b:int})
        * => x 1 2

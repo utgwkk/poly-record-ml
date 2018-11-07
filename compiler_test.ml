@@ -160,6 +160,9 @@ let tests = "Compiler_test">:::[
       assert_equal expected (start input)
     );
     "polymorphic_age_function">::(fun ctxt ->
+      (* Poly(fun x:t2 -> x:t2.age, forall t1::U.t2::{{name:t1}}.t2->t1)
+       * => ifun i1 -> fun x -> x[i1]
+       * *)
       let input = Lld.EPolyGen (
         EAbs (
           "x", TVar 2,

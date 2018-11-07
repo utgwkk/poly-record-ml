@@ -177,5 +177,40 @@ let tests = "Compiler_test">:::[
       in
       assert_equal expected (start input)
     );
+    "polymorphic_age_function_application">::(fun ctxt ->
+      (* let age:forall t1::U.t2::{{name:t1}}.t2->t1)
+       * = Poly(fun x:t2 -> x:t2.age, forall t1::U.t2::{{name:t1}}.t2->t1)
+       * in (age int {age:int, roomno:int}) {age=22, roomno=403}
+       * *)
+      let input =
+        Lld.ELet (
+          "age",
+          Forall ([(1, KUniv); (2, KRecord [("age", TVar 1)])], TFun (TVar 2, TVar 1)),
+          Lld.EPolyGen (
+            EAbs (
+              "x", TVar 2,
+              ERecordGet (EPolyInst ("x", []), TVar 2, "age")
+            ),
+            Forall ([(1, KUniv); (2, KRecord [("age", TVar 1)])], TFun (TVar 2, TVar 1))
+          ),
+          Lld.EApp (
+            Lld.EPolyInst ("age", [TInt; TRecord [("age", TInt); ("roomno", TInt)]]),
+            Lld.ERecord [("age", EInt 22); ("roomno", EInt 403)]
+          )
+        )
+      in
+      let expected = Llp.ELet ("age",
+        Llp.EIdxAbs (
+          1,
+          EAbs ("x", EArrayGet (EVar "x", IVar 1))
+        ),
+        Llp.EApp (
+          Llp.EIdxApp (EVar "age", INat 1),
+          Llp.EArray [EInt 22; EInt 403]
+        )
+      )
+      in
+      assert_equal expected (start input)
+    );
   ];
 ]

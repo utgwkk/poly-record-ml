@@ -1,17 +1,20 @@
 module Lld = Lambda_let_dot
 module Llp = Lambda_let_paren
 
+(* IdxSet(tv::k) *)
 let idxset_kind tv = function
   | Lld.KUniv -> []
   | Lld.KRecord xs ->
       List.map (fun (l, _) -> (l, Llp.TVar tv)) xs
 
+(* IdxSet(F) where k = {{F}}*)
 let idxset xs =
   let rec inner = function
   | [] -> []
   | (tv, k) :: tl -> idxset_kind tv k :: inner tl
   in inner xs |> List.flatten
 
+(* (\tau)^* = \tau *)
 let rec monotycon = function
   | Lld.TVar tv -> Llp.TVar tv
   | Lld.TInt -> Llp.TInt
@@ -33,6 +36,10 @@ let kcon = function
       in
       Llp.KRecord xs'
 
+(* (forall t_1::k_1. \cdots forall t_n::k_n.\tau)^*
+ * = forall t_1::k_1. \cdots forall t_n::k_n.
+ *   idx(l_1, t^'_1) => ... => idx(l_n, t^'_n) => \tau
+ * *)
 let rec tycon (Lld.Forall (xs, t)) =
   let idxsets = idxset xs in
   let xs' =
@@ -43,6 +50,7 @@ let rec tycon (Lld.Forall (xs, t)) =
   | [] -> Llp.Forall (xs', monotycon t)
   | _ -> Llp.Forall (xs', Llp.TIdxFun (idxsets, monotycon t))
 
+(* counter for fresh index variables *)
 let __counter = ref 1
 
 let reset_counter () =

@@ -2,6 +2,7 @@ PACKS = oUnit
 TESTS = \
 				compiler_test.ml \
 				evaluator_test.ml \
+				typechecker_test.ml \
 				test.ml
 SOURCES = \
 					syntax.ml \
@@ -10,6 +11,7 @@ SOURCES = \
 					lambda_let_paren.ml \
 					lambda_let_dot.ml \
 					compiler.ml \
+					typechecker.ml \
 					$(TESTS)
 RESULT = test
 

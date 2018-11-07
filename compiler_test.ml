@@ -57,13 +57,13 @@ let tests = "Compiler_test">:::[
     );
     "compile_1_abs">::(fun ctxt ->
       (* (fun x:int -> 1) => (fun x -> 1) *)
-      let input = Lld.EAbs ("x", TVar 1, EInt 1) in
+      let input = Lld.EAbs ("x", TInt, EInt 1) in
       let expected = Llp.EAbs ("x", EInt 1) in
       assert_equal expected (start input)
     );
     "compile_1_abs_app">::(fun ctxt ->
       (* (fun x:int -> 1) 2 => (fun x -> 1) 2 *)
-      let input = Lld.EApp (EAbs ("x", TVar 1, EInt 1), EInt 2) in
+      let input = Lld.EApp (EAbs ("x", TInt, EInt 1), EInt 2) in
       let expected = Llp.EApp (EAbs ("x", EInt 1), EInt 2) in
       assert_equal expected (start input)
     );

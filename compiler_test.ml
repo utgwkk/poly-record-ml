@@ -159,5 +159,20 @@ let tests = "Compiler_test">:::[
       in
       assert_equal expected (start input)
     );
+    "polymorphic_age_function">::(fun ctxt ->
+      let input = Lld.EPolyGen (
+        EAbs (
+          "x", TVar 2,
+          ERecordGet (EPolyInst ("x", []), TVar 2, "age")
+        ),
+        Forall ([(1, KUniv); (2, KRecord [("age", TInt)])], TFun (TVar 2, TVar 1))
+      ) in
+      let expected = Llp.EIdxAbs (
+        1,
+        EAbs ("x", EArrayGet (EVar "x", IVar 1))
+      )
+      in
+      assert_equal expected (start input)
+    );
   ];
 ]

@@ -1,5 +1,6 @@
 open OUnit2
 open Typechecker
+open Syntax
 open Lambda_let_dot
 
 let tests = "Typechecker_test">:::[
@@ -43,6 +44,21 @@ let tests = "Typechecker_test">:::[
       );
       "|- false : bool">::(fun ctxt ->
         let input = EBool false in
+        let expected = Forall ([], TBool) in
+        assert_equal expected (start input)
+      );
+      "|- 1 + 2 : int">::(fun ctxt ->
+        let input = EBinOp (Plus, EInt 1, EInt 2) in
+        let expected = Forall ([], TInt) in
+        assert_equal expected (start input)
+      );
+      "|- 1 * 2 : int">::(fun ctxt ->
+        let input = EBinOp (Mult, EInt 1, EInt 2) in
+        let expected = Forall ([], TInt) in
+        assert_equal expected (start input)
+      );
+      "|- 1 < 2 : bool">::(fun ctxt ->
+        let input = EBinOp (Lt, EInt 1, EInt 2) in
         let expected = Forall ([], TBool) in
         assert_equal expected (start input)
       );
@@ -169,6 +185,31 @@ let tests = "Typechecker_test">:::[
             ),
             EApp (
               EPolyInst ("age", [TInt; TRecord [("age", TInt); ("roomno", TInt)]]),
+              ERecord [("age", EInt 22); ("roomno", EInt 403)]
+            )
+          )
+        in
+        let expected = Forall ([], TInt) in
+        assert_equal expected (start input)
+      );
+      "polymorphic_next_age_function_application">::(fun ctxt ->
+        (* let next_age:forall t1::{{age:int}}.t1->int)
+         * = Poly(fun x:t1 -> x:t1.age + 1, forall t1::{{age:int}}.t1->int)
+         * in (next_age int {age:int, roomno:int}) {age=22, roomno=403}
+         * *)
+        let input =
+          ELet (
+            "next_age",
+            Forall ([(1, KRecord [("age", TInt)])], TFun (TVar 1, TInt)),
+            EPolyGen (
+              EAbs (
+                "x", TVar 1,
+                EBinOp (Plus, ERecordGet (EPolyInst ("x", []), TVar 1, "age"), EInt 1)
+              ),
+              Forall ([(1, KRecord [("age", TInt)])], TFun (TVar 1, TInt))
+            ),
+            EApp (
+              EPolyInst ("next_age", [TRecord [("age", TInt); ("roomno", TInt)]]),
               ERecord [("age", EInt 22); ("roomno", EInt 403)]
             )
           )

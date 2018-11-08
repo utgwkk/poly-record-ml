@@ -1,4 +1,5 @@
 open Lambda_let_paren
+open Syntax
 
 exception RuntimeError of string
 
@@ -8,10 +9,20 @@ let eval_idx idxenv = function
   | IVar i -> Environment.lookup i idxenv
   | INat i -> INat i
 
+let rec calc_binop op lhs rhs = match (op, lhs, rhs) with
+  | Plus, VInt i1, VInt i2 -> VInt (i1 + i2)
+  | Mult, VInt i1, VInt i2 -> VInt (i1 * i2)
+  | Lt, VInt i1, VInt i2 -> VBool (i1 < i2)
+  | _ -> runtime_error "both operands must be integer"
+
 let rec eval (env : env) (idxenv : idxenv) = function
   | EVar x -> Environment.lookup x env
   | EInt i -> VInt i
   | EBool b -> VBool b
+  | EBinOp (op, e1, e2) ->
+      let v1 = eval env idxenv e1 in
+      let v2 = eval env idxenv e2 in
+      calc_binop op v1 v2
   | EAbs (x, e) -> VProc (x, e, env)
   | EApp (e1, e2) ->
       let v1 = eval env idxenv e1 in

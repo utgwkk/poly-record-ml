@@ -1,4 +1,5 @@
 open OUnit2
+open Syntax
 open Lambda_let_paren
 
 let tests = "Evaluator_test">:::[
@@ -14,6 +15,26 @@ let tests = "Evaluator_test">:::[
 		let expected = VInt 1 in
 		assert_equal expected (Evaluator.start exp)
 	);
+  "3 + 2 = 5">::(fun ctxt ->
+		let exp = EBinOp (Plus, EInt 3, EInt 2) in
+		let expected = VInt 5 in
+		assert_equal expected (Evaluator.start exp)
+  );
+  "3 * 2 = 6">::(fun ctxt ->
+		let exp = EBinOp (Mult, EInt 3, EInt 2) in
+		let expected = VInt 6 in
+		assert_equal expected (Evaluator.start exp)
+  );
+  "1 < 2 = true">::(fun ctxt ->
+		let exp = EBinOp (Lt, EInt 1, EInt 2) in
+		let expected = VBool true in
+		assert_equal expected (Evaluator.start exp)
+  );
+  "2 < 1 = false">::(fun ctxt ->
+		let exp = EBinOp (Lt, EInt 2, EInt 1) in
+    let expected = VBool false in
+		assert_equal expected (Evaluator.start exp)
+  );
   "true_is_true">::(fun ctxt ->
 		let exp = EBool true in
 		let expected = VBool true in

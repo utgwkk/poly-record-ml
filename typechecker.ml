@@ -51,6 +51,17 @@ let rec type_check kenv tyenv = function
        instantiate pt xs
   | EInt _ -> forall_of TInt
   | EBool _ -> forall_of TBool
+  | EBinOp (op, e1, e2) ->
+      let (Forall (_, t1)) = type_check kenv tyenv e1 in
+      let (Forall (_, t2)) = type_check kenv tyenv e2 in
+      begin match op with
+        | Plus -> if t1 = TInt && t2 = TInt then forall_of TInt
+                  else raise Typecheck_failed
+        | Mult -> if t1 = TInt && t2 = TInt then forall_of TInt
+                  else raise Typecheck_failed
+        | Lt -> if t1 = TInt && t2 = TInt then forall_of TBool
+                else raise Typecheck_failed
+      end
   | EAbs (x, t, e) ->
       let tyenv' = Environment.extend x (Forall ([], t)) tyenv in
       let (Forall (xs, t')) = type_check kenv tyenv' e in

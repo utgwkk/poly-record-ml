@@ -53,6 +53,7 @@ type exp =
   | EVar of id
   | EInt of int
   | EBool of bool
+  | EBinOp of binOp * exp * exp
   | EAbs of id * exp
   | EApp of exp * exp
   | ELet of id * exp * exp

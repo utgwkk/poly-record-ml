@@ -19,6 +19,7 @@ type exp =
   | EPolyInst of id * ty list
   | EInt of int
   | EBool of bool
+  | EBinOp of binOp * exp * exp
   | EAbs of id * ty * exp
   | EApp of exp * exp
   | EPolyGen of exp * polyty

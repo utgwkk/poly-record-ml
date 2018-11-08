@@ -1,5 +1,6 @@
 open OUnit2
 open Compiler
+open Syntax
 
 module Lld = Lambda_let_dot
 module Llp = Lambda_let_paren
@@ -63,6 +64,21 @@ let tests = "Compiler_test">:::[
     "false => false">::(fun ctxt ->
       let input = Lld.EBool false in
       let expected = Llp.EBool false in
+      assert_equal expected (start input)
+    );
+    "1 + 2">::(fun ctxt ->
+      let input = Lld.EBinOp (Plus, EInt 1, EInt 2) in
+      let expected = Llp.EBinOp (Plus, EInt 1, EInt 2) in
+      assert_equal expected (start input)
+    );
+    "1 * 2">::(fun ctxt ->
+      let input = Lld.EBinOp (Mult, EInt 1, EInt 2) in
+      let expected = Llp.EBinOp (Mult, EInt 1, EInt 2) in
+      assert_equal expected (start input)
+    );
+    "1 < 2">::(fun ctxt ->
+      let input = Lld.EBinOp (Lt, EInt 1, EInt 2) in
+      let expected = Llp.EBinOp (Lt, EInt 1, EInt 2) in
       assert_equal expected (start input)
     );
     "1_abs">::(fun ctxt ->

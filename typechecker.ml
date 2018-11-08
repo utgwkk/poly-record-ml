@@ -50,6 +50,7 @@ let rec type_check kenv tyenv = function
       let pt = Environment.lookup x tyenv in
        instantiate pt xs
   | EInt _ -> forall_of TInt
+  | EBool _ -> forall_of TBool
   | EAbs (x, t, e) ->
       let tyenv' = Environment.extend x (Forall ([], t)) tyenv in
       let (Forall (xs, t')) = type_check kenv tyenv' e in

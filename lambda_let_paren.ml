@@ -9,6 +9,7 @@ type idx =
 type ty =
   | TVar of tyvar
   | TInt
+  | TBool
   | TFun of ty * ty
   | TRecord of (label * ty) list
   | TIdxFun of idxty list * ty
@@ -24,13 +25,13 @@ type subst = (tyvar * ty) list
 let substitute subs t =
   let rec inner (tv, t) = function
     | TVar tv' -> if tv = tv' then t else TVar tv'
-    | TInt -> TInt
     | TFun (t1, t2) -> TFun (inner (tv, t) t1, inner (tv, t) t2)
     | TRecord xs ->
         let xs' = List.map (fun (l, t') -> (l, inner (tv, t') t)) xs in
         TRecord xs'
     | TIdxFun (xs, t') ->
         TIdxFun (xs, inner (tv, t) t')
+    | t -> t
   in List.fold_right inner subs t
 
 exception Label_not_found of label
@@ -51,6 +52,7 @@ let idx_value l =
 type exp =
   | EVar of id
   | EInt of int
+  | EBool of bool
   | EAbs of id * exp
   | EApp of exp * exp
   | ELet of id * exp * exp
@@ -62,6 +64,7 @@ type exp =
 
 type value =
   | VInt of int
+  | VBool of bool
   | VProc of id * exp * env
   | VArray of value array
   | VIdxAbs of idxvar * exp

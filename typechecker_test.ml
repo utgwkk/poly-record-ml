@@ -36,6 +36,16 @@ let tests = "Typechecker_test">:::[
         let expected = Forall ([], TInt) in
         assert_equal expected (start input)
       );
+      "|- true : bool">::(fun ctxt ->
+        let input = EBool true in
+        let expected = Forall ([], TBool) in
+        assert_equal expected (start input)
+      );
+      "|- false : bool">::(fun ctxt ->
+        let input = EBool false in
+        let expected = Forall ([], TBool) in
+        assert_equal expected (start input)
+      );
       "1_abs">::(fun ctxt ->
         (* (fun x:int -> 1) *)
         let input = EAbs ("x", TInt, EInt 1) in

@@ -55,6 +55,16 @@ let tests = "Compiler_test">:::[
       let expected = Llp.EInt 1 in
       assert_equal expected (start input)
     );
+    "true => true">::(fun ctxt ->
+      let input = Lld.EBool true in
+      let expected = Llp.EBool true in
+      assert_equal expected (start input)
+    );
+    "false => false">::(fun ctxt ->
+      let input = Lld.EBool false in
+      let expected = Llp.EBool false in
+      assert_equal expected (start input)
+    );
     "1_abs">::(fun ctxt ->
       (* (fun x:int -> 1) => (fun x -> 1) *)
       let input = Lld.EAbs ("x", TInt, EInt 1) in

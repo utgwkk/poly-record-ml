@@ -18,6 +18,7 @@ let idxset xs =
 let rec monotycon = function
   | Lld.TVar tv -> Llp.TVar tv
   | Lld.TInt -> Llp.TInt
+  | Lld.TBool -> Llp.TBool
   | Lld.TFun (t1, t2) -> Llp.TFun (monotycon t1, monotycon t2)
   | Lld.TRecord ts ->
       let ts' =
@@ -85,6 +86,7 @@ let rec compile (lbenv : Llp.lbenv) tyenv = function
             Llp.EVar x
       end
   | Lld.EInt i -> Llp.EInt i
+  | Lld.EBool b -> Llp.EBool b
   | Lld.EAbs (x, t, e) ->
       let t' = Llp.Forall ([], monotycon t) in
       let tyenv' = Environment.extend x t' tyenv in

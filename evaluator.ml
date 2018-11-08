@@ -11,6 +11,7 @@ let eval_idx idxenv = function
 let rec eval (env : env) (idxenv : idxenv) = function
   | EVar x -> Environment.lookup x env
   | EInt i -> VInt i
+  | EBool b -> VBool b
   | EAbs (x, e) -> VProc (x, e, env)
   | EApp (e1, e2) ->
       let v1 = eval env idxenv e1 in

@@ -14,6 +14,16 @@ let tests = "Evaluator_test">:::[
 		let expected = VInt 1 in
 		assert_equal expected (Evaluator.start exp)
 	);
+  "true_is_true">::(fun ctxt ->
+		let exp = EBool true in
+		let expected = VBool true in
+		assert_equal expected (Evaluator.start exp)
+  );
+  "false_is_false">::(fun ctxt ->
+		let exp = EBool false in
+		let expected = VBool false in
+		assert_equal expected (Evaluator.start exp)
+  );
   "id_abs">::(fun ctxt ->
 		(* fun x -> x *)
 		let exp = EAbs ("x", EVar "x") in

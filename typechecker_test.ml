@@ -26,12 +26,12 @@ let tests = "Typechecker_test">:::[
   ];
   "entrypoint">:::[
     "success">:::[
-      "0 => 0">::(fun ctxt ->
+      "|- 0 : int">::(fun ctxt ->
         let input = EInt 0 in
         let expected = Forall ([], TInt) in
         assert_equal expected (start input)
       );
-      "1 => 1">::(fun ctxt ->
+      "|- 1 : int">::(fun ctxt ->
         let input = EInt 1 in
         let expected = Forall ([], TInt) in
         assert_equal expected (start input)

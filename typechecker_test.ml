@@ -231,6 +231,20 @@ let tests = "Typechecker_test">:::[
         let input = EApp (EInt 1, EInt 2) in
         assert_raises Typecheck_failed (fun () -> start input)
       );
+      "record_modify_with_different_type">::(fun ctxt ->
+        let input = ERecordModify (
+          ERecord [("a", EInt 3)], TRecord [("a", TInt)],
+          "a", EBool true
+        ) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
+      "record_modify_field_not_found">::(fun ctxt ->
+        let input = ERecordModify (
+          ERecord [("a", EInt 3)], TRecord [("a", TInt)],
+          "b", EInt 5
+        ) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
     ]
   ]
 ]

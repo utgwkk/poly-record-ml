@@ -112,7 +112,9 @@ let rec type_check kenv tyenv = function
   | ERecordModify (e1, t, l, e2) ->
       let (Forall (xs, t')) = type_check kenv tyenv e1 in
       begin match kind_check kenv t' l with
-        | Some t1 -> Forall (xs, t')
+        | Some t1 ->
+            let (Forall (_, t2)) = type_check kenv tyenv e2 in
+            if t1 = t2 then Forall (xs, t') else raise Typecheck_failed
         | None -> raise Typecheck_failed
       end
 

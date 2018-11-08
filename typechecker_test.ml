@@ -70,12 +70,12 @@ let tests = "Typechecker_test">:::[
         let expected = Forall ([], TInt) in
         assert_equal expected (start input)
       );
-      "|- \x:int.1 : int -> int">::(fun ctxt ->
+      "|- fun x:int -> 1 : int -> int">::(fun ctxt ->
         let input = EAbs ("x", TInt, EInt 1) in
         let expected = Forall ([], TFun (TInt, TInt)) in
         assert_equal expected (start input)
       );
-      "|- (\x:int.1) 2 : int">::(fun ctxt ->
+      "|- (fun x:int -> 1) 2 : int">::(fun ctxt ->
         let input = EApp (EAbs ("x", TInt, EInt 1), EInt 2) in
         let expected = Forall ([], TInt) in
         assert_equal expected (start input)

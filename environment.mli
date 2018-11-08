@@ -7,3 +7,5 @@ val extend : 'a -> 'b -> ('a, 'b) t -> ('a, 'b) t
 val lookup : 'a -> ('a, 'b) t -> 'b
 val map : ('b -> 'c) -> ('a, 'b) t -> ('a, 'c) t
 val fold_right : ('b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
+
+val from_list : ('a * 'b) list -> ('a, 'b) t

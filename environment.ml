@@ -15,3 +15,6 @@ let rec map f = function
 
 let rec fold_right f env a =
   match env with [] -> a | (_, v) :: rest -> f v (fold_right f rest a)
+
+let from_list xs =
+  List.fold_left (fun env (k, v) -> extend k v env) xs empty

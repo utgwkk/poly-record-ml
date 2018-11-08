@@ -54,6 +54,7 @@ type exp =
   | EInt of int
   | EBool of bool
   | EBinOp of binOp * exp * exp
+  | EIfThenElse of exp * exp * exp
   | EAbs of id * exp
   | EApp of exp * exp
   | ELet of id * exp * exp

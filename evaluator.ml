@@ -23,6 +23,14 @@ let rec eval (env : env) (idxenv : idxenv) = function
       let v1 = eval env idxenv e1 in
       let v2 = eval env idxenv e2 in
       calc_binop op v1 v2
+  | EIfThenElse (e1, e2, e3) ->
+      let v1 = eval env idxenv e1 in
+      begin match v1 with
+        | VBool b ->
+            if b then eval env idxenv e2
+            else eval env idxenv e3
+        | _ -> runtime_error "condition must be boolean"
+      end
   | EAbs (x, e) -> VProc (x, e, env)
   | EApp (e1, e2) ->
       let v1 = eval env idxenv e1 in

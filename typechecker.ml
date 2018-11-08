@@ -62,6 +62,14 @@ let rec type_check kenv tyenv = function
         | Lt -> if t1 = TInt && t2 = TInt then forall_of TBool
                 else raise Typecheck_failed
       end
+  | EIfThenElse (e1, e2, e3) ->
+      let (Forall (_, t1)) = type_check kenv tyenv e1 in
+      let pt1 = type_check kenv tyenv e2 in
+      let pt2 = type_check kenv tyenv e3 in
+      begin match t1 with
+        | TBool -> if pt1 = pt2 then pt1 else raise Typecheck_failed
+        | _ -> raise Typecheck_failed
+      end
   | EAbs (x, t, e) ->
       let tyenv' = Environment.extend x (Forall ([], t)) tyenv in
       let (Forall (xs, t')) = type_check kenv tyenv' e in

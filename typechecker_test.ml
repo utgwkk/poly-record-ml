@@ -55,6 +55,21 @@ let tests = "Typechecker_test">:::[
         let expected = Forall ([], TBool) in
         assert_equal expected (start input)
       );
+      "|- if true then 2 else 3 : int">::(fun ctxt ->
+        let input = EIfThenElse (EBool true, EInt 2, EInt 3) in
+        let expected = Forall ([], TInt) in
+        assert_equal expected (start input)
+      );
+      "|- if false then 2 else 3 : int">::(fun ctxt ->
+        let input = EIfThenElse (EBool true, EInt 2, EInt 3) in
+        let expected = Forall ([], TInt) in
+        assert_equal expected (start input)
+      );
+      "|- if 1 < 2 then 2 else 3 : int">::(fun ctxt ->
+        let input = EIfThenElse (EBinOp (Lt, EInt 1, EInt 2), EInt 2, EInt 3) in
+        let expected = Forall ([], TInt) in
+        assert_equal expected (start input)
+      );
       "|- \x:int.1 : int -> int">::(fun ctxt ->
         let input = EAbs ("x", TInt, EInt 1) in
         let expected = Forall ([], TFun (TInt, TInt)) in
@@ -203,5 +218,19 @@ let tests = "Typechecker_test">:::[
         assert_equal expected (start input)
       );
     ];
+    "failure">:::[
+      "if_condition_is_not_boolean">::(fun ctxt ->
+        let input = EIfThenElse (EInt 1, EInt 2, EInt 3) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
+      "if_type_unmatched">::(fun ctxt ->
+        let input = EIfThenElse (EBool true, EInt 2, EBool false) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
+      "non_function_application">::(fun ctxt ->
+        let input = EApp (EInt 1, EInt 2) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
+    ]
   ]
 ]

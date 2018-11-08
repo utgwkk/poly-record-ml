@@ -91,6 +91,11 @@ let rec compile (lbenv : Llp.lbenv) tyenv = function
       let e1' = compile lbenv tyenv e1 in
       let e2' = compile lbenv tyenv e2 in
       Llp.EBinOp (op, e1', e2')
+  | Lld.EIfThenElse (e1, e2, e3) ->
+      let e1' = compile lbenv tyenv e1 in
+      let e2' = compile lbenv tyenv e2 in
+      let e3' = compile lbenv tyenv e3 in
+      Llp.EIfThenElse (e1', e2', e3')
   | Lld.EAbs (x, t, e) ->
       let t' = Llp.Forall ([], monotycon t) in
       let tyenv' = Environment.extend x t' tyenv in

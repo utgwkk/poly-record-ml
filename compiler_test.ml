@@ -81,6 +81,11 @@ let tests = "Compiler_test">:::[
       let expected = Llp.EBinOp (Lt, EInt 1, EInt 2) in
       assert_equal expected (start input)
     );
+    "if true then 2 else 3">::(fun ctxt ->
+      let input = Lld.EIfThenElse (EBool true, EInt 2, EInt 3) in
+      let expected = Llp.EIfThenElse (EBool true, EInt 2, EInt 3) in
+      assert_equal expected (start input)
+    );
     "1_abs">::(fun ctxt ->
       (* (fun x:int -> 1) => (fun x -> 1) *)
       let input = Lld.EAbs ("x", TInt, EInt 1) in

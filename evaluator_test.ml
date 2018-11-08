@@ -45,6 +45,16 @@ let tests = "Evaluator_test">:::[
 		let expected = VBool false in
 		assert_equal expected (Evaluator.start exp)
   );
+  "if true then 2 else 3">::(fun ctxt ->
+		let exp = EIfThenElse (EBool true, EInt 2, EInt 3) in
+		let expected = VInt 2 in
+		assert_equal expected (Evaluator.start exp)
+  );
+  "if false then 2 else 3">::(fun ctxt ->
+		let exp = EIfThenElse (EBool false, EInt 2, EInt 3) in
+		let expected = VInt 3 in
+		assert_equal expected (Evaluator.start exp)
+  );
   "id_abs">::(fun ctxt ->
 		(* fun x -> x *)
 		let exp = EAbs ("x", EVar "x") in

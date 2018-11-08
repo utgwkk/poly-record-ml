@@ -231,6 +231,16 @@ let tests = "Typechecker_test">:::[
         let input = EApp (EInt 1, EInt 2) in
         assert_raises Typecheck_failed (fun () -> start input)
       );
+      "self_application_function">::(fun ctxt ->
+        (* Poly(fun x:t1 -> x x, forall t1::U.t1 -> t1) *)
+        let input =
+          EPolyGen (
+            EAbs ("x", TVar 1, EApp (EPolyInst ("x", []), EPolyInst ("x", []))),
+            Forall ([(1, KUniv)], TFun (TVar 1, TVar 1)
+          )
+        ) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
       "record_modify_with_different_type">::(fun ctxt ->
         let input = ERecordModify (
           ERecord [("a", EInt 3)], TRecord [("a", TInt)],

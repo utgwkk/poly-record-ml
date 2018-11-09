@@ -31,14 +31,14 @@ let rec eval (env : env) (idxenv : idxenv) = function
             else eval env idxenv e3
         | _ -> runtime_error "condition must be boolean"
       end
-  | EAbs (x, e) -> VProc (x, e, env)
+  | EAbs (x, e) -> VProc (x, e, env, idxenv)
   | EApp (e1, e2) ->
       let v1 = eval env idxenv e1 in
       let v2 = eval env idxenv e2 in
       begin match v1 with
-        | VProc (x, e, env') ->
+        | VProc (x, e, env', idxenv') ->
             let env'' = Environment.extend x v2 env' in
-            eval env'' idxenv e
+            eval env'' idxenv' e
         | _ -> runtime_error "not a function"
       end
   | ELet (x, e1, e2) ->
@@ -68,14 +68,14 @@ let rec eval (env : env) (idxenv : idxenv) = function
             VArray arr'
         | _ -> runtime_error "not an array"
       end
-  | EIdxAbs (iv, e) -> VIdxAbs (iv, e)
+  | EIdxAbs (iv, e) -> VIdxAbs (iv, e, env, idxenv)
   | EIdxApp (e, i) ->
       let v = eval env idxenv e in
       let INat idx = eval_idx idxenv i in
       begin match v with
-        | VIdxAbs (iv, e) ->
-            let idxenv' = Environment.extend iv i idxenv in
-            eval env idxenv' e
+        | VIdxAbs (iv, e, env', idxenv') ->
+            let idxenv'' = Environment.extend iv i idxenv' in
+            eval env' idxenv'' e
         | _ -> runtime_error "not a index function"
       end
 

@@ -1,0 +1,9 @@
+opam-version: "1.2"
+name: "poly-record-ml"
+version: "0.1"
+maintainer: "utagawa kiki <utagawakiki@gmail.com>"
+authors: "utagawa kiki <utagawakiki@gmail.com>"
+homepage: "https://github.com/utgwkk/poly-record-ml"
+depends: [ "menhir" "ounit" ]
+build: [make]
+build-test: [make "test"]

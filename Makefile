@@ -1,4 +1,5 @@
 PACKS = oUnit
+OCAMLYACC = menhir
 TESTS = \
 				test/compiler_test.ml \
 				test/evaluator_test.ml \
@@ -12,6 +13,7 @@ SOURCES = \
 					implementation.ml \
 					compiler.ml \
 					typechecker.ml \
+					parser.mly \
 					$(TESTS)
 RESULT = prog
 

@@ -26,6 +26,8 @@ setup.log
 ._d/
 ._bcdi/
 ._ncdi/
+parser.ml
+parser.mli
 
 # output file
 test

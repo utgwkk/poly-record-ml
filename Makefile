@@ -14,10 +14,19 @@ SOURCES = \
 					compiler.ml \
 					typechecker.ml \
 					parser.mly \
-					lexer.mll \
-					main.ml
+					lexer.mll
+MAIN = main.ml
 RESULT = prog
 
-all: bc
+all: frontend
 
--include OCamlMakefile
+frontend: SOURCES += $(MAIN)
+frontend: bc
+
+.PHONY: test
+
+test: SOURCES += $(TESTS)
+test: bc
+	./$(RESULT); rm $(RESULT)
+
+include OCamlMakefile

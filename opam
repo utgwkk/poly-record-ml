@@ -1,0 +1,9 @@
+opam-version: "1.2"
+name: "record-hashtable"
+version: "0.1"
+maintainer: "utagawa kiki <utagawakiki@gmail.com>"
+authors: "utagawa kiki <utagawakiki@gmail.com>"
+homepage: "https://github.com/utgwkk/record-hashtable"
+depends: [ "menhir" "oUnit" ]
+build:
+  [make]

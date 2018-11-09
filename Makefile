@@ -15,10 +15,9 @@ SOURCES = \
 					typechecker.ml \
 					parser.mly \
 					lexer.mll \
-					$(TESTS)
+					main.ml
 RESULT = prog
 
-test: bc
-	./$(RESULT); rm ./$(RESULT)
+all: bc
 
 -include OCamlMakefile

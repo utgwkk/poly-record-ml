@@ -76,3 +76,12 @@ and env = (id, value) Environment.t
 and idxenv = (idxvar, idx) Environment.t
 
 type lbenv = (idxty, idx) Environment.t
+
+let rec string_of_value = function
+  | VInt i -> string_of_int i
+  | VBool b -> string_of_bool b
+  | VProc _ -> "<fun>"
+  | VArray arr ->
+      let xs = Array.to_list arr in
+      "{" ^ String.concat ", " (List.map string_of_value xs) ^ "}"
+  | VIdxAbs _ -> "<ifun>"

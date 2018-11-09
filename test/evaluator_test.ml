@@ -116,4 +116,9 @@ let tests = "Evaluator_test">:::[
     let expected = VInt 23 in
 		assert_equal expected (Evaluator.start exp)
   );
+  "(ifun i1 -> ((ifun i2 -> {1, 100, 1}) i2) i1) 2">::(fun ctxt ->
+    let exp = EIdxApp (EIdxAbs (1, EIdxApp (EIdxAbs (2, EArrayGet (EArray [EInt 1; EInt 100; EInt 1], IVar 2)), IVar 1)), INat 2) in
+    let expected = VInt 100 in
+		assert_equal expected (Evaluator.start exp)
+  );
 ]

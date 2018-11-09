@@ -76,7 +76,7 @@ Expr :
 | FunExpr { $1 }
 
 FunExpr :
-  FUN x=ID COLON t=Type RARROW e=Expr { EAbs (x, t, e)}
+  FUN LPAREN x=ID COLON t=Type RPAREN RARROW e=Expr { EAbs (x, t, e)}
 
 LetExpr :
   LET x=ID COLON pt=PolyType EQ e1=Expr IN e2=Expr { ELet (x, pt, e1, e2) }

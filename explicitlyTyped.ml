@@ -1,6 +1,6 @@
 open Syntax
 
-type idx = Lambda_let_paren.idx
+type idx = Implementation.idx
 
 type ty =
   | TVar of tyvar

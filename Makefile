@@ -8,8 +8,8 @@ SOURCES = \
 					syntax.ml \
 					environment.ml environment.mli \
 					evaluator.ml \
-					lambda_let_paren.ml \
-					lambda_let_dot.ml \
+					explicitlyTyped.ml \
+					implementation.ml \
 					compiler.ml \
 					typechecker.ml \
 					$(TESTS)

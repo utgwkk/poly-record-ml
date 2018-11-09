@@ -1,6 +1,6 @@
 open OUnit2
 open Syntax
-open Lambda_let_paren
+open Implementation
 
 let tests = "Evaluator_test">:::[
   "zero_is_zero">::(fun ctxt ->

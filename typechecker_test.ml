@@ -1,7 +1,7 @@
 open OUnit2
 open Typechecker
 open Syntax
-open Lambda_let_dot
+open ExplicitlyTyped
 
 let tests = "Typechecker_test">:::[
   "partial_check">:::[

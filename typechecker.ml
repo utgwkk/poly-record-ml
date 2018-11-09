@@ -1,4 +1,4 @@
-open Lambda_let_dot
+open ExplicitlyTyped
 
 exception Typecheck_failed
 exception Kindcheck_failed

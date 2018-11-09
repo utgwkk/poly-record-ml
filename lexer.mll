@@ -49,5 +49,5 @@ rule main = parse
     {
       let buf = Lexing.lexeme lexbuf in
       let len = String.length buf in
-      TVAR (int_of_string (String.sub buf 1 len)) }
+      TVAR (int_of_string (String.sub buf 1 (len - 1))) }
 	| eof { exit 0 }

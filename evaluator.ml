@@ -5,9 +5,9 @@ exception RuntimeError of string
 
 let runtime_error s = raise (RuntimeError s)
 
-let eval_idx idxenv = function
-  | IVar i -> Environment.lookup i idxenv
-  | INat i -> INat i
+let rec eval_idx idxenv = function
+  | IVar i -> eval_idx idxenv (Environment.lookup i idxenv)
+  | INat i -> i
 
 let rec calc_binop op lhs rhs = match (op, lhs, rhs) with
   | Plus, VInt i1, VInt i2 -> VInt (i1 + i2)
@@ -50,7 +50,7 @@ let rec eval (env : env) (idxenv : idxenv) = function
       VArray vs
   | EArrayGet (e, i) ->
       let v = eval env idxenv e in
-      let INat idx = eval_idx idxenv i in
+      let idx = eval_idx idxenv i in
       let idx' = idx - 1 in
       begin match v with
         | VArray arr -> Array.get arr idx'
@@ -58,7 +58,7 @@ let rec eval (env : env) (idxenv : idxenv) = function
       end
   | EArrayModify (e1, i, e2) ->
       let v1 = eval env idxenv e1 in
-      let INat idx = eval_idx idxenv i in
+      let idx = eval_idx idxenv i in
       let idx' = idx - 1 in
       let v2 = eval env idxenv e2 in
       begin match v1 with
@@ -71,7 +71,7 @@ let rec eval (env : env) (idxenv : idxenv) = function
   | EIdxAbs (iv, e) -> VIdxAbs (iv, e, env, idxenv)
   | EIdxApp (e, i) ->
       let v = eval env idxenv e in
-      let INat idx = eval_idx idxenv i in
+      let idx = eval_idx idxenv i in
       begin match v with
         | VIdxAbs (iv, e, env', idxenv') ->
             let idxenv'' = Environment.extend iv i idxenv' in

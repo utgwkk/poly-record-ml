@@ -56,11 +56,11 @@ KindRecordBody :
 (* polytypes *)
 PolyType :
   Type { Forall ([], $1) }
-| FORALL bs=BoundBody t=Type { Forall (bs, t) }
+| FORALL bs=BoundBody DOT t=Type { Forall (bs, t) }
 
 BoundBody :
-  bp=BoundPart DOT r=BoundBody { bp :: r }
-| bp=BoundPart DOT { [bp] }
+  bp=BoundPart COMMA r=BoundBody { bp :: r }
+| bp=BoundPart { [bp] }
 
 BoundPart :
   tv=TVAR COLONCOLON k=Kind { (tv, k) }

@@ -5,6 +5,7 @@
     ("bool", BOOL);
     ("else", ELSE);
     ("false", FALSE);
+    ("forall", FORALL);
     ("fun", FUN);
     ("if", IF);
     ("in", IN);
@@ -32,6 +33,10 @@ rule main = parse
   | "::" { COLONCOLON }
   | "." { DOT }
   | "," { COMMA }
+  | "=" { EQ }
+  | "+" { PLUS }
+  | "*" { MULT }
+  | "<" { LT }
   | ['a'-'z'] ['a'-'z' '0'-'9' '_' '\'']*
     {
       let id = Lexing.lexeme lexbuf in

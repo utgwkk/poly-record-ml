@@ -6,4 +6,4 @@ authors: "utagawa kiki <utagawakiki@gmail.com>"
 homepage: "https://github.com/utgwkk/record-hashtable"
 depends: [ "menhir" "ounit" ]
 build: [make]
-build-test: ["make" "test"]
+build-test: [make "test"]

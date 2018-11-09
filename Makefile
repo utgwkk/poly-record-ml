@@ -1,9 +1,9 @@
 PACKS = oUnit
 TESTS = \
-				compiler_test.ml \
-				evaluator_test.ml \
-				typechecker_test.ml \
-				test.ml
+				test/compiler_test.ml \
+				test/evaluator_test.ml \
+				test/typechecker_test.ml \
+				test/entrypoint.ml
 SOURCES = \
 					syntax.ml \
 					environment.ml environment.mli \
@@ -13,7 +13,7 @@ SOURCES = \
 					compiler.ml \
 					typechecker.ml \
 					$(TESTS)
-RESULT = test
+RESULT = prog
 
 test: bc
 	./$(RESULT); rm ./$(RESULT)

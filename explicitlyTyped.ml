@@ -28,3 +28,15 @@ type exp =
   | ERecord of (label * exp) list
   | ERecordGet of exp * ty * label
   | ERecordModify of exp * ty * label * exp
+
+let rec string_of_ty = function
+  | TVar i -> "TVar " ^ string_of_int i
+  | TInt -> "TInt"
+  | TBool -> "TBool"
+  | TFun (t1, t2) -> Printf.sprintf "TFun (%s, %s)" (string_of_ty t1) (string_of_ty t2)
+  | TRecord xs ->
+      let xs' =
+        xs
+        |> List.map (fun (l, t) -> Printf.sprintf "\"%s\", %s" l (string_of_ty t))
+      in
+      Printf.sprintf "TRecord [%s]" (String.concat "; " xs')

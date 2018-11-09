@@ -1,6 +1,6 @@
 language: c
 sudo: required
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh; bash -ex .travis-opam.sh; opam install -y menhir oUnit
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh; bash -ex .travis-opam.sh
 script: make test
 env:
-  - OCAML_VERSION=4.06
+  - OCAML_VERSION=4.06 EXTRA_DEPS="menhir oUnit"

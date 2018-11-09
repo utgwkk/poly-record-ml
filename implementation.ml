@@ -77,6 +77,40 @@ and idxenv = (idxvar, idx) Environment.t
 
 type lbenv = (idxty, idx) Environment.t
 
+let string_of_idx = function
+  | IVar i -> "IVar " ^ string_of_int i
+  | INat i -> "INat " ^ string_of_int i
+
+let rec string_of_exp = function
+  | EVar x -> "EVar \"" ^ x ^ "\""
+  | EInt i -> "EInt " ^ string_of_int i
+  | EBool b -> "Bool " ^ string_of_bool b
+  | EBinOp (op, e1, e2) ->
+      let opstr = match op with
+      | Plus -> "Plus"
+      | Mult -> "Mult"
+      | Lt -> "Lt"
+      in Printf.sprintf "EBinOp (%s, %s, %s)" opstr (string_of_exp e1) (string_of_exp e2)
+  | EIfThenElse (e1, e2, e3) ->
+      Printf.sprintf "EIfThenElse (%s, %s, %s)" (string_of_exp e1) (string_of_exp e2) (string_of_exp e3)
+  | EAbs (x, e) ->
+      Printf.sprintf "EAbs (\"%s\", %s)" x (string_of_exp e)
+  | EApp (e1, e2) ->
+      Printf.sprintf "EApp (%s, %s)" (string_of_exp e1) (string_of_exp e2)
+  | ELet (x, e1, e2) ->
+      Printf.sprintf "ELet (\"%s\", %s, %s)" x (string_of_exp e1) (string_of_exp e2)
+  | EArray xs ->
+      let xs' = List.map string_of_exp xs in
+      Printf.sprintf "EArray [%s]" (String.concat "; " xs')
+  | EArrayGet (e, i) ->
+      Printf.sprintf "EArrayGet (%s, %s)" (string_of_exp e) (string_of_idx i)
+  | EArrayModify (e1, i, e2) ->
+      Printf.sprintf "EArrayModify (%s, %s, %s)" (string_of_exp e1) (string_of_idx i) (string_of_exp e2)
+  | EIdxAbs (i, e) ->
+      Printf.sprintf "EIdxAbs (%d, %s)" i (string_of_exp e)
+  | EIdxApp (e, i) ->
+      Printf.sprintf "EIdxApp (%s, %s)" (string_of_exp e) (string_of_idx i)
+
 let rec string_of_value = function
   | VInt i -> string_of_int i
   | VBool b -> string_of_bool b

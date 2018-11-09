@@ -38,7 +38,12 @@ AType :
   INT { TInt }
 | BOOL { TBool }
 | TVAR { TVar $1 }
+| LRECORDPAREN TypeRecordBody RRECORDPAREN { TRecord $2 }
 | LPAREN Type RPAREN { $2 }
+
+TypeRecordBody :
+  l=ID COLON t=Type COMMA r=TypeRecordBody { (l, t) :: r }
+| l=ID COLON t=Type { [(l, t)] }
 
 (* kinds *)
 Kind :
@@ -105,8 +110,8 @@ AExpr :
 | FALSE { EBool false }
 | LRECORDPAREN RecordBody RRECORDPAREN { ERecord $2 } (* record constructor *)
 | e=AExpr COLON t=Type DOT l=ID { ERecordGet (e, t, l) } (* e:t.l *)
-| MODIFY LPAREN e1=Expr COLON t=Type COMMA l=ID COMMA e2=Expr RPAREN { ERecordModify (e1, t, l, e2) }
-| POLY LPAREN e=Expr COLON pt=PolyType RPAREN { EPolyGen (e, pt) }
+| MODIFY LPAREN e1=AExpr COLON t=Type COMMA l=ID COMMA e2=Expr RPAREN { ERecordModify (e1, t, l, e2) }
+| POLY LPAREN e=AExpr COLON pt=PolyType RPAREN { EPolyGen (e, pt) }
 | LPAREN Expr RPAREN { $2 }
 
 PolyInstBody :

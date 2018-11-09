@@ -31,7 +31,6 @@ parser.mli
 lexer.ml
 
 # output file
-test
 prog
 *.log
 *.cache

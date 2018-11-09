@@ -195,7 +195,7 @@ let tests = "Typechecker_test">:::[
       "polymorphic_next_age_function_application">::(fun ctxt ->
         (* let next_age:forall t1::{{age:int}}.t1->int)
          * = Poly(fun x:t1 -> x:t1.age + 1, forall t1::{{age:int}}.t1->int)
-         * in (next_age int {age:int, roomno:int}) {age=22, roomno=403}
+         * in (next_age {age:int, roomno:int}) {age=22, roomno=403}
          * *)
         let input =
           ELet (

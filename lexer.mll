@@ -20,7 +20,7 @@
 
 rule main = parse
   | [' ' '\009' '\012' '\n']+     { main lexbuf }
-  | "-"? ['0'-'9'] { INTV (int_of_string (Lexing.lexeme lexbuf)) }
+  | "-"? ['0'-'9']+ { INTV (int_of_string (Lexing.lexeme lexbuf)) }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | ";;" { SEMISEMI }

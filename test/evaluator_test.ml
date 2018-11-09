@@ -109,4 +109,11 @@ let tests = "Evaluator_test">:::[
 		let expected = VInt 5 in
 		assert_equal expected (Evaluator.start exp)
   );
+  "nextage">::(fun ctxt ->
+    let exp = ELet ("nextage",
+                    EIdxAbs (1, EAbs ("x", EBinOp (Plus, EArrayGet (EVar "x", IVar 1), EInt 1))),
+                    EApp (EIdxApp (EVar "nextage", INat 1), EArray [EInt 22; EInt 403])) in
+    let expected = VInt 25 in
+		assert_equal expected (Evaluator.start exp)
+  );
 ]

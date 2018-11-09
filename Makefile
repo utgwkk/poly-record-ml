@@ -14,6 +14,7 @@ SOURCES = \
 					compiler.ml \
 					typechecker.ml \
 					parser.mly \
+					lexer.mll \
 					$(TESTS)
 RESULT = prog
 

@@ -28,6 +28,7 @@ setup.log
 ._ncdi/
 parser.ml
 parser.mli
+lexer.ml
 
 # output file
 test

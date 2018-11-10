@@ -54,7 +54,7 @@ let string_of_polyty = function
   | Forall (xs, t) ->
       let xs' =
         xs
-        |> List.map (fun (i, k) -> Printf.sprintf "\"%d\", %s" i (string_of_kind k))
+        |> List.map (fun (i, k) -> Printf.sprintf "%d, %s" i (string_of_kind k))
       in
       Printf.sprintf "Forall ([%s], %s)" (String.concat "; " xs') (string_of_ty t)
 

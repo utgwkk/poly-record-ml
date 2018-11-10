@@ -40,3 +40,20 @@ let rec string_of_ty = function
         |> List.map (fun (l, t) -> Printf.sprintf "\"%s\", %s" l (string_of_ty t))
       in
       Printf.sprintf "TRecord [%s]" (String.concat "; " xs')
+
+let rec string_of_kind = function
+  | KUniv -> "KUniv"
+  | KRecord xs ->
+      let xs' =
+        xs
+        |> List.map (fun (l, t) -> Printf.sprintf "\"%s\", %s" l (string_of_ty t))
+      in
+      Printf.sprintf "KRecord [%s]" (String.concat "; " xs')
+
+let string_of_polyty = function
+  | Forall (xs, t) ->
+      let xs' =
+        xs
+        |> List.map (fun (i, k) -> Printf.sprintf "\"%d\", %s" i (string_of_kind k))
+      in
+      Printf.sprintf "Forall ([%s], %s)" (String.concat "; " xs') (string_of_ty t)

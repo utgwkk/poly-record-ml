@@ -84,7 +84,7 @@ let string_of_idx = function
 let rec string_of_exp = function
   | EVar x -> "EVar \"" ^ x ^ "\""
   | EInt i -> "EInt " ^ string_of_int i
-  | EBool b -> "Bool " ^ string_of_bool b
+  | EBool b -> "EBool " ^ string_of_bool b
   | EBinOp (op, e1, e2) ->
       let opstr = match op with
       | Plus -> "Plus"

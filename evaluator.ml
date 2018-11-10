@@ -71,7 +71,6 @@ let rec eval (env : env) (idxenv : idxenv) = function
   | EIdxAbs (iv, e) -> VIdxAbs (iv, e, env, idxenv)
   | EIdxApp (e, i) ->
       let v = eval env idxenv e in
-      let idx = eval_idx idxenv i in
       begin match v with
         | VIdxAbs (iv, e, env', idxenv') ->
             let idxenv'' = Environment.extend iv i idxenv' in

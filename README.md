@@ -26,7 +26,7 @@
          | <boolean>
          | <term> <op> <term>
          | "if" <term> "then" <term> "else" <term>
-         | "fun" "(" <variable> ":" <monotype> ")" "->" <term>
+         | "fun" <variable> ":" <monotype> "->" <term>
          | <term> <term>
          | "poly" "(" <term> ":" <polytype> ")"
          | "let" <variable> ":" <polytype> "=" <term> "in" <term>

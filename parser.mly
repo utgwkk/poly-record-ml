@@ -20,7 +20,7 @@
 %token INT BOOL
 %token <Syntax.tyvar> TVAR
 %token FORALL COLONCOLON
-%token KLPAREN KRPAREN (* {{ }} *)
+%token KLPAREN (* #{ *)
 
 %start main
 %type <ExplicitlyTyped.exp> main
@@ -47,7 +47,7 @@ TypeRecordBody :
 
 (* kinds *)
 Kind :
-  KLPAREN KindRecordBody KRPAREN { KRecord $2 }
+  KLPAREN KindRecordBody RRECORDPAREN { KRecord $2 }
 
 KindRecordBody :
   l=ID COLON t=Type COMMA r=KindRecordBody { (l, t) :: r }

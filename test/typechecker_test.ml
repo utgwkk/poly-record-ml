@@ -260,6 +260,12 @@ let tests = "Typechecker_test">:::[
         ) in
         assert_raises Typecheck_failed (fun () -> start input)
       );
+      "polygen_type_annotation_wrong">::(fun ctxt ->
+        let input = EPolyGen (
+          EInt 1, Forall ([], TFun (TInt, TBool))
+        ) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
     ]
   ]
 ]

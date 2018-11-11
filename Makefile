@@ -12,6 +12,8 @@ SOURCES = \
 					evaluator.ml \
 					explicitlyTyped.ml \
 					implementation.ml \
+					polyRecord.ml \
+					infer.ml \
 					compiler.ml \
 					typechecker.ml \
 					parser.mly \

@@ -92,8 +92,10 @@ let rec type_check kenv tyenv = function
       Forall (xs, t')
   | ELet (x, pt, e1, e2) ->
       let pt' = type_check kenv tyenv e1 in
-      let tyenv' = Environment.extend x pt' tyenv in
-      type_check kenv tyenv' e2
+      if not (polyty_eq pt pt') then raise Typecheck_failed
+      else
+        let tyenv' = Environment.extend x pt' tyenv in
+        type_check kenv tyenv' e2
   | ERecord xs ->
       let xs' =
         xs

@@ -253,7 +253,7 @@ let tests = "Typechecker_test">:::[
         ) in
         assert_raises Typecheck_failed (fun () -> start input)
       );
-      "type_annotation_wrong">::(fun ctxt ->
+      "let_type_annotation_wrong">::(fun ctxt ->
         let input = ELet (
           "x", Forall ([], TFun (TInt, TBool)),
           EInt 1, EPolyInst ("x", [])
@@ -263,6 +263,13 @@ let tests = "Typechecker_test">:::[
       "polygen_type_annotation_wrong">::(fun ctxt ->
         let input = EPolyGen (
           EInt 1, Forall ([], TFun (TInt, TBool))
+        ) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
+      "let x:forall t1.t1 = 1 in x int is rejected">::(fun ctxt ->
+        let input = ELet (
+          "x", Forall ([1, KUniv], TVar 1),
+          EInt 1, EPolyInst ("x", [TInt])
         ) in
         assert_raises Typecheck_failed (fun () -> start input)
       );

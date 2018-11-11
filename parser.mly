@@ -124,4 +124,4 @@ RecordBody :
 
 PolyInstBody :
   t=Type r=PolyInstBody { t :: r }
-| t=Type { [t] }
+| t=AType { [t] }

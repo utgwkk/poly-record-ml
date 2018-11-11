@@ -89,7 +89,8 @@ let rec type_check kenv tyenv = function
         ) kenv xs
       in
       let (Forall (_, t')) = type_check kenv' tyenv e in
-      Forall (xs, t')
+      if not (ty_eq t t') then raise Typecheck_failed
+      else Forall (xs, t')
   | ELet (x, pt, e1, e2) ->
       let pt' = type_check kenv tyenv e1 in
       if not (polyty_eq pt pt') then raise Typecheck_failed

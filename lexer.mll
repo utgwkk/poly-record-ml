@@ -45,9 +45,9 @@ rule main = parse
       with
       _ -> Parser.ID id
     }
-  | "'" ['0'-'9']+
+  | "'t" ['0'-'9']+
     {
       let buf = Lexing.lexeme lexbuf in
       let len = String.length buf in
-      TVAR (int_of_string (String.sub buf 1 (len - 1))) }
+      TVAR (int_of_string (String.sub buf 2 (len - 2))) }
 	| eof { exit 0 }

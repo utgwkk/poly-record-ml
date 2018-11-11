@@ -136,17 +136,15 @@ let tests = "Typechecker_test">:::[
         in
         assert_equal expected (start input)
       );
-      "let_and_polyinst">::(fun ctxt ->
-        (* let (x:forall t1::{{a:int, b:int}}.t1) = {a=1, b=2}
-         * in x ({a:int, b:int})
+      "let_and_polyinst_no_type_application">::(fun ctxt ->
+        (* let (x:{a:int, b:int}) = {a=1, b=2}
+         * in x
          * *)
         let input = ELet (
           "x",
-          Forall ([
-            1, KRecord [("a", TInt); ("b", TInt)];
-          ], TVar 1),
+          Forall ([], TRecord [("a", TInt); ("b", TInt)]),
           ERecord [("a", EInt 1); ("b", EInt 2)],
-          EPolyInst ("x", [TRecord [("a", TInt); ("b", TInt)]])
+          EPolyInst ("x", [])
         ) in
         let expected = Forall ([], TRecord [("a", TInt); ("b", TInt)]) in
         assert_equal expected (start input);
@@ -252,6 +250,13 @@ let tests = "Typechecker_test">:::[
         let input = ERecordModify (
           ERecord [("a", EInt 3)], TRecord [("a", TInt)],
           "b", EInt 5
+        ) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
+      "type_annotation_wrong">::(fun ctxt ->
+        let input = ELet (
+          "x", Forall ([], TFun (TInt, TBool)),
+          EInt 1, EPolyInst ("x", [])
         ) in
         assert_raises Typecheck_failed (fun () -> start input)
       );

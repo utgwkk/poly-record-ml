@@ -14,18 +14,18 @@ SOURCES = \
 					compiler.ml \
 					typechecker.ml \
 					parser.mly \
-					lexer.mll
+					lexer.mll \
+					$(MAIN)
 MAIN = main.ml
 RESULT = prog
 
 all: frontend
 
-frontend: SOURCES += $(MAIN)
 frontend: bc
 
 .PHONY: test
 
-test: SOURCES += $(TESTS)
+test: MAIN = $(TESTS)
 test: bc
 	./$(RESULT); rm $(RESULT)
 

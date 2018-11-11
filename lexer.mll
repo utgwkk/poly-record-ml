@@ -26,8 +26,7 @@ rule main = parse
   | ";;" { SEMISEMI }
   | "{" { LRECORDPAREN }
   | "}" { RRECORDPAREN }
-  | "{{" { KLPAREN }
-  | "}}" { KRPAREN }
+  | "#{" { KLPAREN }
   | "->" { RARROW }
   | ":" { COLON }
   | "::" { COLONCOLON }

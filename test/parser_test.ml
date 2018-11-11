@@ -26,12 +26,24 @@ let tests = "Parser test">:::([
             EApp (EPolyInst ("f", [TInt]), EInt 2))
   );
   (
+    "fun x:int -> x;;",
+    EAbs ("x", TInt, EPolyInst ("x", []))
+  );
+  (
+    "fun (x:int->int) -> x;;",
+    EAbs ("x", TFun (TInt, TInt), EPolyInst ("x", []))
+  );
+  (
+    "fun x:(int->int) -> x;;",
+    EAbs ("x", TFun (TInt, TInt), EPolyInst ("x", []))
+  );
+  (
     "{a = {b = 1}};;",
     ERecord ["a", ERecord ["b", EInt 1]];
   );
   (
     "let nextage:forall 't1::#{age:int}.'t1->int =
-     poly((fun (x:'t1) -> x:'t1.age + 1) : forall 't1::#{age:int}.'t1->int)
+     poly((fun x:'t1 -> x:'t1.age + 1) : forall 't1::#{age:int}.'t1->int)
      in (nextage {age:int}) {age = 22};;",
     ELet ("nextage",
           Forall ([1, KRecord ["age", TInt]], TFun (TVar 1, TInt)),

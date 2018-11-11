@@ -42,16 +42,17 @@ AType :
 | LPAREN Type RPAREN { $2 }
 
 TypeRecordBody :
-  l=ID COLON t=Type COMMA r=TypeRecordBody { (l, t) :: r }
-| l=ID COLON t=Type { [(l, t)] }
+  separated_nonempty_list(COMMA, TypeRecordField) { $1 }
+
+TypeRecordField :
+| l=ID COLON t=Type { (l, t) }
 
 (* kinds *)
 Kind :
   KLPAREN KindRecordBody RRECORDPAREN { KRecord $2 }
 
 KindRecordBody :
-  l=ID COLON t=Type COMMA r=KindRecordBody { (l, t) :: r }
-| l=ID COLON t=Type { [(l, t)] }
+  separated_nonempty_list(COMMA, TypeRecordField) { $1 }
 
 (* polytypes *)
 PolyType :
@@ -59,8 +60,7 @@ PolyType :
 | FORALL bs=BoundBody DOT t=Type { Forall (bs, t) }
 
 BoundBody :
-  bp=BoundPart COMMA r=BoundBody { bp :: r }
-| bp=BoundPart { [bp] }
+  separated_nonempty_list(COMMA, BoundPart) { $1 }
 
 BoundPart :
   tv=TVAR COLONCOLON k=Kind { (tv, k) }
@@ -75,6 +75,7 @@ Expr :
   LetExpr { $1 }
 | FunExpr { $1 }
 | IfExpr { $1 }
+| LtExpr { $1 }
 
 FunExpr :
   FUN x=ID COLON t=AType RARROW e=Expr { EAbs (x, t, e)}
@@ -85,7 +86,6 @@ LetExpr :
 
 IfExpr :
   IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }
-| LtExpr { $1 }
 
 LtExpr :
   e1=PExpr LT e2=PExpr { EBinOp (Lt, e1,e2) }
@@ -104,8 +104,7 @@ AppExpr :
 | AExpr { $1 }
 
 AExpr :
-  x=ID is=PolyInstBody { EPolyInst (x, is) }
-| x=ID { EPolyInst (x, []) }
+  x=ID is=loption(PolyInstBody) { EPolyInst (x, is) }
 | RecordExpr { $1 }
 | INTV { EInt $1 }
 | TRUE { EBool true }
@@ -116,11 +115,10 @@ AExpr :
 | LPAREN Expr RPAREN { $2 }
 
 RecordExpr :
-  LRECORDPAREN RecordBody RRECORDPAREN { ERecord $2 } (* record constructor *)
+  LRECORDPAREN separated_nonempty_list(COMMA, RecordField) RRECORDPAREN { ERecord $2 } (* record constructor *)
 
-RecordBody :
-  l=ID EQ e=Expr COMMA r=RecordBody { (l, e) :: r }
-| l=ID EQ e=Expr { [(l, e)] }
+RecordField :
+  l=ID EQ e=Expr { (l, e) }
 
 PolyInstBody :
   t=Type r=PolyInstBody { t :: r }

@@ -74,7 +74,6 @@ main :
 Expr :
   LetExpr { $1 }
 | FunExpr { $1 }
-| RecordExpr { $1 }
 | IfExpr { $1 }
 
 FunExpr :
@@ -82,13 +81,6 @@ FunExpr :
 
 LetExpr :
   LET x=ID COLON pt=PolyType EQ e1=Expr IN e2=Expr { ELet (x, pt, e1, e2) }
-
-RecordExpr :
-  LRECORDPAREN RecordBody RRECORDPAREN { ERecord $2 } (* record constructor *)
-
-RecordBody :
-  l=ID EQ e=Expr COMMA r=RecordBody { (l, e) :: r }
-| l=ID EQ e=Expr { [(l, e)] }
 
 IfExpr :
   IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }
@@ -113,6 +105,7 @@ AppExpr :
 AExpr :
   x=ID is=PolyInstBody { EPolyInst (x, is) }
 | x=ID { EPolyInst (x, []) }
+| RecordExpr { $1 }
 | INTV { EInt $1 }
 | TRUE { EBool true }
 | FALSE { EBool false }
@@ -120,6 +113,13 @@ AExpr :
 | MODIFY LPAREN e1=AExpr COLON t=Type COMMA l=ID COMMA e2=Expr RPAREN { ERecordModify (e1, t, l, e2) }
 | POLY LPAREN e=AExpr COLON pt=PolyType RPAREN { EPolyGen (e, pt) }
 | LPAREN Expr RPAREN { $2 }
+
+RecordExpr :
+  LRECORDPAREN RecordBody RRECORDPAREN { ERecord $2 } (* record constructor *)
+
+RecordBody :
+  l=ID EQ e=Expr COMMA r=RecordBody { (l, e) :: r }
+| l=ID EQ e=Expr { [(l, e)] }
 
 PolyInstBody :
   t=Type r=PolyInstBody { t :: r }

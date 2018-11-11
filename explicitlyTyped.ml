@@ -64,7 +64,7 @@ let rec string_of_exp = function
         xs
         |> List.map string_of_ty
       in
-      Printf.sprintf "PolyInst (%s, [%s])" x (String.concat "; " xs')
+      Printf.sprintf "EPolyInst (\"%s\", [%s])" x (String.concat "; " xs')
   | EInt i -> "EInt " ^ string_of_int i
   | EBool b -> "EBool " ^ string_of_bool b
   | EBinOp (op, e1, e2) ->

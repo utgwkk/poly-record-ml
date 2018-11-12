@@ -44,3 +44,7 @@
 <field> ::= <label> "=" <term>
 <label> ::= <variable>
 ```
+
+## References
+
+- Ohori, A. A polymorphic record calculus and its compilation. TOPLAS, 1995. https://dl.acm.org/citation.cfm?id=218572

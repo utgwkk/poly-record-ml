@@ -12,7 +12,7 @@ let rec compile prompt chan k =
 
   begin try
     let pty = Typechecker.start exp in
-    if_debug (fun () -> Printf.printf "(* Type check *)\n%s\n\n" (ExplicitlyTyped.string_of_polyty pty));
+    if_debug (fun () -> Printf.printf "(* Type check *)\n%s\n\n" (PolyRecord.string_of_polyty pty));
   with
     | Typechecker.Typecheck_failed -> retry k "[ERROR] type check failed"
     | Typechecker.Kindcheck_failed -> retry k "[ERROR] kind check failed"

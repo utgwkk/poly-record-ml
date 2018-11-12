@@ -1,6 +1,7 @@
 open OUnit2
 open Typechecker
 open Syntax
+open PolyRecord
 open ExplicitlyTyped
 
 let tests = "Typechecker_test">:::[

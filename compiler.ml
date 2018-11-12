@@ -1,10 +1,11 @@
+module PL = PolyRecord
 module ET = ExplicitlyTyped
 module Impl = Implementation
 
 (* IdxSet(tv::k) *)
 let idxset_kind tv = function
-  | ET.KUniv -> []
-  | ET.KRecord xs ->
+  | PL.KUniv -> []
+  | PL.KRecord xs ->
       List.map (fun (l, _) -> (l, Impl.TVar tv)) xs
 
 (* IdxSet(F) where k = {{F}}*)
@@ -16,11 +17,11 @@ let idxset xs =
 
 (* (\tau)^* = \tau *)
 let rec monotycon = function
-  | ET.TVar tv -> Impl.TVar tv
-  | ET.TInt -> Impl.TInt
-  | ET.TBool -> Impl.TBool
-  | ET.TFun (t1, t2) -> Impl.TFun (monotycon t1, monotycon t2)
-  | ET.TRecord ts ->
+  | PL.TVar tv -> Impl.TVar tv
+  | PL.TInt -> Impl.TInt
+  | PL.TBool -> Impl.TBool
+  | PL.TFun (t1, t2) -> Impl.TFun (monotycon t1, monotycon t2)
+  | PL.TRecord ts ->
       let ts' =
         ts
         |> List.map (fun (l, t) -> (l, monotycon t))
@@ -29,8 +30,8 @@ let rec monotycon = function
       Impl.TRecord ts'
 
 let kcon = function
-  | ET.KUniv -> Impl.KUniv
-  | ET.KRecord xs ->
+  | PL.KUniv -> Impl.KUniv
+  | PL.KRecord xs ->
       let xs' =
         xs
         |> List.map (fun (l, t) -> (l, monotycon t))
@@ -41,7 +42,7 @@ let kcon = function
  * = forall t_1::k_1. \cdots forall t_n::k_n.
  *   idx(l_1, t^'_1) => ... => idx(l_n, t^'_n) => \tau
  * *)
-let rec tycon (ET.Forall (xs, t)) =
+let rec tycon (PL.Forall (xs, t)) =
   let idxsets = idxset xs in
   let xs' =
     xs
@@ -105,7 +106,7 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       let e1' = compile lbenv tyenv e1 in
       let e2' = compile lbenv tyenv e2 in
       Impl.EApp (e1', e2')
-  | ET.EPolyGen (e, (ET.Forall (xs, _))) ->
+  | ET.EPolyGen (e, (PL.Forall (xs, _))) ->
       let xs' = idxset xs in
       let label_tv_idxvar_tuple_list =
         List.map (fun (l, t) -> (l, t, fresh_idxvar ())) xs'

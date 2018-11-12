@@ -1,5 +1,6 @@
 open Syntax
 open PolyRecord
+module ET = ExplicitlyTyped
 
 (* E *)
 type eqs = (ty * ty) list
@@ -11,38 +12,42 @@ type 'a subst = (tyvar * 'a) list
 let eqs_of_subst s = List.map (fun (tv, a) -> (TVar tv, a)) s
 
 (* [ty/tyvar]ty *)
-let rec substitute_ty t (tv, ty) = match t with
+let rec subst_ty t (tv, ty) = match t with
   | TVar tv' -> if tv = tv' then ty else TVar tv'
   | TFun (t1, t2) ->
-      TFun (substitute_ty t1 (tv, ty), substitute_ty t2 (tv, ty))
+      TFun (subst_ty t1 (tv, ty), subst_ty t2 (tv, ty))
   | TRecord xs ->
       let xs' =
         xs
-        |> List.map (fun (l, t) -> (l, substitute_ty t (tv, ty)))
+        |> List.map (fun (l, t) -> (l, subst_ty t (tv, ty)))
       in TRecord xs'
   | t -> t
 
 (* [ty/tyvar]S *)
-let subst_subs s subst = List.map (fun (tv, t) -> (tv, substitute_ty t s)) subst
+let subst_subs s subst = List.map (fun (tv, t) -> (tv, subst_ty t s)) subst
 
 (* [ty/tyvar]k *)
-let substitute_kind s = function
+let subst_kind s = function
   | KUniv -> KUniv
   | KRecord xs ->
       let xs' =
         xs
-        |> List.map (fun (l, t) -> (l, substitute_ty t s))
+        |> List.map (fun (l, t) -> (l, subst_ty t s))
       in KRecord xs'
 
 (* [ty/tyvar]K *)
-let subst_kenv s kenv = Environment.map (substitute_kind s) kenv
+let subst_kenv s kenv = Environment.map (subst_kind s) kenv
 
-(* S(ty) -> ty *)
-let subst_type subst t = List.fold_left substitute_ty t subst
+(* S(ty) *)
+let apply_subst_to_ty subst t = List.fold_left subst_ty t subst
+
+(* S(T) *)
+let apply_subst_to_tyenv s tyenv =
+  List.fold_left (fun env s -> Environment.map (fun (Forall (xs, t)) -> Forall (xs, subst_ty t s)) env) tyenv s
 
 (* [ty/tyvar]E *)
 let subst_eqs subst eqs =
-  List.map (fun (t1, t2) -> (subst_type subst t1, subst_type subst t2)) eqs
+  List.map (fun (t1, t2) -> (apply_subst_to_ty subst t1, apply_subst_to_ty subst t2)) eqs
 
 (* レコードのフィールド名の和集合をとる *)
 let union_record xs ys =
@@ -111,14 +116,6 @@ let rec ftv tv = function
 exception Unification_failed of string
 
 (* \mathcal{U} *)
-(* TODO: implement
- * [x] (I)
- * [ ] (II)
- * [x] (III)
- * [x] (IV)
- * [x] (V)
- * [x] (IX)
- * *)
 let rec unify eqs kenv subst ksubst =
   match eqs with
   | [] -> (eqs, kenv, subst, ksubst)
@@ -136,7 +133,7 @@ let rec unify eqs kenv subst ksubst =
               let uni = union_record xs ys in
               let k' =
                 KRecord (List.map (fun x -> (x, List.assoc x (xs @ ys))) uni)
-                |> substitute_kind (tv1, TVar tv2)
+                |> subst_kind (tv1, TVar tv2)
               in
               let kenv' =
                 kenv
@@ -161,7 +158,7 @@ let rec unify eqs kenv subst ksubst =
       | TVar tv, TRecord ys -> (* (IV) *)
           let k = Environment.lookup tv kenv in
           begin match k with
-          | KRecord xs -> 
+          | KRecord xs ->
               let eqs' =
                 List.map (fun (l, _) -> (List.assoc l xs, List.assoc l ys)) xs @ rest
                 |> subst_eqs [(tv, TRecord ys)]

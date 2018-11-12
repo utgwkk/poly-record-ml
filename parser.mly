@@ -1,5 +1,6 @@
 %{
   open Syntax
+  open PolyRecord
   open ExplicitlyTyped
 %}
 

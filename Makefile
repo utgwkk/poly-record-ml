@@ -10,9 +10,9 @@ SOURCES = \
 					syntax.ml \
 					environment.ml environment.mli \
 					evaluator.ml \
+					polyRecord.ml \
 					explicitlyTyped.ml \
 					implementation.ml \
-					polyRecord.ml \
 					infer.ml \
 					compiler.ml \
 					typechecker.ml \

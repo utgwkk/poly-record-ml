@@ -18,9 +18,14 @@
   ] |> List.sort compare
 }
 
+let alphabet = ['a'-'z']
+let digit = ['0'-'9']
+let number = digit+
+let ident = alphabet (alphabet | digit | ['_' '\''])*
+
 rule main = parse
   | [' ' '\009' '\012' '\n']+     { main lexbuf }
-  | "-"? ['0'-'9']+ { INTV (int_of_string (Lexing.lexeme lexbuf)) }
+  | "-"? number { INTV (int_of_string (Lexing.lexeme lexbuf)) }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | ";;" { SEMISEMI }
@@ -36,7 +41,7 @@ rule main = parse
   | "+" { PLUS }
   | "*" { MULT }
   | "<" { LT }
-  | ['a'-'z'] ['a'-'z' '0'-'9' '_' '\'']*
+  | ident
     {
       let id = Lexing.lexeme lexbuf in
       try 
@@ -44,9 +49,8 @@ rule main = parse
       with
       _ -> Parser.ID id
     }
-  | "'t" ['0'-'9']+
+  | "'t" (number as strnum)
     {
-      let buf = Lexing.lexeme lexbuf in
-      let len = String.length buf in
-      TVAR (int_of_string (String.sub buf 2 (len - 2))) }
+      TVAR (int_of_string strnum)
+    }
 	| eof { exit 0 }

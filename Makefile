@@ -13,6 +13,7 @@ SOURCES = \
 					polyRecord.ml \
 					explicitlyTyped.ml \
 					implementation.ml \
+					mySet.ml mySet.mli \
 					infer.ml \
 					compiler.ml \
 					typechecker.ml \

@@ -14,9 +14,15 @@ let rec map f = function
   | [] -> []
   | (id, v) :: rest -> (id, f v) :: map f rest
 
+let rec remove x = function
+  | [] -> []
+  | (id, v) :: rest -> if x = id then remove x rest else (id, v) :: remove x rest
+
 
 let rec fold_right f env a =
   match env with [] -> a | (_, v) :: rest -> f v (fold_right f rest a)
 
 let from_list xs =
   List.fold_left (fun env (k, v) -> extend k v env) xs empty
+
+let domain env = List.map fst env

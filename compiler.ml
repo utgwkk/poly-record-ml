@@ -2,6 +2,17 @@ module PL = PolyRecord
 module ET = ExplicitlyTyped
 module Impl = Implementation
 
+(* counter for fresh index variables *)
+let __counter = ref 1
+
+let reset_counter () =
+  __counter := 1
+
+let fresh_idxvar () =
+  let rval = !__counter in
+  __counter := !__counter + 1;
+  rval
+
 (* IdxSet(tv::k) *)
 let idxset_kind tv = function
   | PL.KUniv -> []
@@ -14,6 +25,22 @@ let idxset xs =
   | [] -> []
   | (tv, k) :: tl -> idxset_kind tv k :: inner tl
   in inner xs |> List.flatten
+
+(* IdxSet(K) *)
+let idxset_kenv kenv =
+  let dom = Environment.domain kenv in
+  let idxset =
+    dom
+    |> List.map (fun tv ->
+      let k = Environment.lookup tv kenv in
+      idxset_kind tv k
+    )
+    |> List.flatten
+  in
+  idxset
+  |> List.fold_left (fun env (l, t) ->
+      Environment.extend (l, t) (Impl.IVar (fresh_idxvar())) env
+    ) Environment.empty
 
 (* (\tau)^* = \tau *)
 let rec monotycon = function
@@ -51,17 +78,6 @@ let rec tycon (PL.Forall (xs, t)) =
   match idxsets with
   | [] -> Impl.Forall (xs', monotycon t)
   | _ -> Impl.Forall (xs', Impl.TIdxFun (idxsets, monotycon t))
-
-(* counter for fresh index variables *)
-let __counter = ref 1
-
-let reset_counter () =
-  __counter := 1
-
-let fresh_idxvar () =
-  let rval = !__counter in
-  __counter := !__counter + 1;
-  rval
 
 let rec compile (lbenv : Impl.lbenv) tyenv = function
   | ET.EPolyInst (x, xs) ->
@@ -155,6 +171,7 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       Impl.EArrayModify (e1', idx, e2')
 
 (* entrypoint *)
-let start exp =
+let start kenv exp =
   reset_counter ();
-  compile Environment.empty Environment.empty exp
+  let lbenv = idxset_kenv kenv in
+  compile lbenv Environment.empty exp

@@ -55,6 +55,33 @@ let string_of_polyty = function
       in
       Printf.sprintf "Forall ([%s], %s)" (String.concat "; " xs') (string_of_ty t)
 
+let rec string_of_exp = function
+  | EVar x ->
+      Printf.sprintf "EVar \"%s\"" x
+  | EInt i -> "EInt " ^ string_of_int i
+  | EBool b -> "EBool " ^ string_of_bool b
+  | EBinOp (op, e1, e2) ->
+      let opstr = match op with
+      | Plus -> "Plus"
+      | Mult -> "Mult"
+      | Lt -> "Lt"
+      in Printf.sprintf "EBinOp (%s, %s, %s)" opstr (string_of_exp e1) (string_of_exp e2)
+  | EIfThenElse (e1, e2, e3) ->
+      Printf.sprintf "EIfThenElse (%s, %s, %s)" (string_of_exp e1) (string_of_exp e2) (string_of_exp e3)
+  | EAbs (x, e) ->
+      Printf.sprintf "EAbs (\"%s\", %s)" x (string_of_exp e)
+  | EApp (e1, e2) ->
+      Printf.sprintf "EApp (%s, %s)" (string_of_exp e1) (string_of_exp e2)
+  | ELet (x, e1, e2) ->
+      Printf.sprintf "ELet (\"%s\", %s, %s)" x (string_of_exp e1) (string_of_exp e2)
+  | ERecord xs ->
+      let xs' = List.map (fun (l, e) -> Printf.sprintf "(\"%s\", %s)" l (string_of_exp e)) xs in
+      Printf.sprintf "ERecord [%s]" (String.concat "; " xs')
+  | ERecordGet (e, l) ->
+      Printf.sprintf "ERecordGet (%s, \"%s\")" (string_of_exp e)  l
+  | ERecordModify (e1, l, e2) ->
+      Printf.sprintf "ERecordModify (%s, \"%s\", %s)" (string_of_exp e1) l (string_of_exp e2)
+
 let rec ty_eq t1 t2 = match t1, t2 with
   | TVar i1, TVar i2 -> i1 = i2
   | TInt, TInt -> true

@@ -8,10 +8,13 @@ let rec compile prompt chan k =
   flush stdout;
 
   let exp = Parser.main Lexer.main (Lexing.from_channel chan) in
-  if_debug (fun () -> Printf.printf "(* Input *)\n%s\n\n" (ExplicitlyTyped.string_of_exp exp));
+  if_debug (fun () -> Printf.printf "(* Input *)\n%s\n\n" (PolyRecord.string_of_exp exp));
+
+  let (kenv, _, exp, ty) = Infer.start exp in
+  if_debug (fun () -> Printf.printf "(* Type inference *)\n%s\n%s\n\n" (ExplicitlyTyped.string_of_exp exp) (PolyRecord.string_of_ty ty));
 
   begin try
-    let pty = Typechecker.start exp in
+    let pty = Typechecker.type_check kenv Environment.empty exp in
     if_debug (fun () -> Printf.printf "(* Type check *)\n%s\n\n" (PolyRecord.string_of_polyty pty));
   with
     | Typechecker.Typecheck_failed -> retry k "[ERROR] type check failed"

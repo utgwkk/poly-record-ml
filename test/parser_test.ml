@@ -1,5 +1,5 @@
 open OUnit2
-open ExplicitlyTyped
+open PolyRecord
 
 let parse s = Parser.main Lexer.main (Lexing.from_string s)
 let assert_parse expected s = assert_equal expected (parse s)
@@ -16,41 +16,24 @@ let tests = "Parser test">:::([
   (
     "f 1 + f 2;;",
     EBinOp (Plus,
-            EApp (EPolyInst ("f", []), EInt 1),
-            EApp (EPolyInst ("f", []), EInt 2))
+            EApp (EVar "f", EInt 1),
+            EApp (EVar "f", EInt 2))
   );
   (
-    "f int 1 + f int 2;;",
-    EBinOp (Plus,
-            EApp (EPolyInst ("f", [TInt]), EInt 1),
-            EApp (EPolyInst ("f", [TInt]), EInt 2))
-  );
-  (
-    "fun x:int -> x;;",
-    EAbs ("x", TInt, EPolyInst ("x", []))
-  );
-  (
-    "fun (x:int->int) -> x;;",
-    EAbs ("x", TFun (TInt, TInt), EPolyInst ("x", []))
-  );
-  (
-    "fun x:(int->int) -> x;;",
-    EAbs ("x", TFun (TInt, TInt), EPolyInst ("x", []))
+    "fun x -> x;;",
+    EAbs ("x", EVar "x")
   );
   (
     "{a = {b = 1}};;",
     ERecord ["a", ERecord ["b", EInt 1]];
   );
   (
-    "let nextage:forall 't1::#{age:int}.'t1->int =
-     poly((fun x:'t1 -> x:'t1.age + 1) : forall 't1::#{age:int}.'t1->int)
-     in (nextage {age:int}) {age = 22};;",
+    "let nextage = fun x -> x.age + 1
+     in nextage {age = 22};;",
     ELet ("nextage",
-          Forall ([1, KRecord ["age", TInt]], TFun (TVar 1, TInt)),
-          EPolyGen (EAbs ("x", TVar 1,
-                          EBinOp (Plus, ERecordGet (EPolyInst ("x", []), TVar 1, "age"), EInt 1)),
-                    Forall ([1, KRecord ["age", TInt]], TFun (TVar 1, TInt))),
-          EApp (EPolyInst ("nextage", [TRecord ["age", TInt]]), ERecord [("age", EInt 22)]))
+          EAbs ("x",
+                EBinOp (Plus, ERecordGet (EVar "x", "age"), EInt 1)),
+          EApp (EVar "nextage", ERecord [("age", EInt 22)]))
   );
   ] |> List.map (fun (s, e) -> s >:: fun ctxt -> assert_parse e s)
 )

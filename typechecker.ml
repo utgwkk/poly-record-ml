@@ -1,4 +1,5 @@
 open ExplicitlyTyped
+open PolyRecord
 
 exception Typecheck_failed
 exception Kindcheck_failed

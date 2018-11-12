@@ -123,4 +123,4 @@ let rec type_check kenv tyenv = function
       end
 
 (* entrypoint *)
-let start exp = type_check Environment.empty Environment.empty exp
+let start kenv exp = type_check kenv Environment.empty exp

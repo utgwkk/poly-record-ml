@@ -11,7 +11,9 @@ let rec compile prompt chan k =
   if_debug (fun () -> Printf.printf "(* Input *)\n%s\n\n" (PolyRecord.string_of_exp exp));
 
   let (exp, kenv, pty) = Infer.start exp in
-  if_debug (fun () -> Printf.printf "(* Type inference *)\n%s\n%s\n\n" (ExplicitlyTyped.string_of_exp exp) (PolyRecord.string_of_polyty pty));
+  if_debug (fun () ->
+    Printf.printf "(* Type inference *)\n%s\n%s\n\n" (ExplicitlyTyped.string_of_exp exp) (PolyRecord.pp_polyty pty);
+  );
 
   begin try
     let pty = Typechecker.start kenv exp in

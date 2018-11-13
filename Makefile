@@ -9,11 +9,11 @@ TESTS = \
 SOURCES = \
 					syntax.ml \
 					environment.ml environment.mli \
+					mySet.ml mySet.mli \
 					evaluator.ml \
 					polyRecord.ml \
 					explicitlyTyped.ml \
 					implementation.ml \
-					mySet.ml mySet.mli \
 					infer.ml \
 					compiler.ml \
 					typechecker.ml \

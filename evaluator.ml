@@ -5,6 +5,56 @@ exception RuntimeError of string
 
 let runtime_error s = raise (RuntimeError s)
 
+let rec subst_idx (idx, idxr) = function
+  | EBinOp (op, e1, e2) ->
+      let e1' = subst_idx (idx, idxr) e1 in
+      let e2' = subst_idx (idx, idxr) e2 in
+      EBinOp (op, e1', e2')
+  | EIfThenElse (e1, e2, e3) ->
+      let e1' = subst_idx (idx, idxr) e1 in
+      let e2' = subst_idx (idx, idxr) e2 in
+      let e3' = subst_idx (idx, idxr) e3 in
+      EIfThenElse (e1', e2', e3')
+  | EAbs (x, e) ->
+      let e' = subst_idx (idx, idxr) e in
+      EAbs (x, e')
+  | EApp (e1, e2) ->
+      let e1' = subst_idx (idx, idxr) e1 in
+      let e2' = subst_idx (idx, idxr) e2 in
+      EApp (e1', e2')
+  | ELet (x, e1, e2) ->
+      let e1' = subst_idx (idx, idxr) e1 in
+      let e2' = subst_idx (idx, idxr) e2 in
+      ELet (x, e1', e2')
+  | EArray xs ->
+      EArray (List.map (subst_idx (idx, idxr)) xs)
+  | EArrayGet (e, i) ->
+      let e' = subst_idx (idx, idxr) e in
+      let i' = match i with
+          | IVar i' -> if i' = idx then idxr else IVar i'
+          | INat i' -> INat i'
+      in
+      EArrayGet (e', i')
+  | EArrayModify (e1, i, e2) ->
+      let e1' = subst_idx (idx, idxr) e1 in
+      let e2' = subst_idx (idx, idxr) e2 in
+      let i' = match i with
+          | IVar i' -> if i' = idx then idxr else IVar i'
+          | INat i' -> INat i'
+      in
+      EArrayModify (e1', i', e2')
+  | EIdxAbs (i, e) ->
+      let e' = subst_idx (idx, idxr) e in
+      EIdxAbs (i, e')
+  | EIdxApp (e, i) ->
+      let e' = subst_idx (idx, idxr) e in
+      let i' = match i with
+          | IVar i' -> if i' = idx then idxr else IVar i'
+          | INat i' -> INat i'
+      in
+      EIdxApp (e', i')
+  | e -> e
+
 let rec eval_idx idxenv = function
   | IVar i -> eval_idx idxenv (Environment.lookup i idxenv)
   | INat i -> i
@@ -68,13 +118,13 @@ let rec eval (env : env) (idxenv : idxenv) = function
             VArray arr'
         | _ -> runtime_error "not an array"
       end
-  | EIdxAbs (iv, e) -> VIdxAbs (iv, e, env, idxenv)
+  | EIdxAbs (iv, e) -> VIdxAbs (iv, e, env)
   | EIdxApp (e, i) ->
       let v = eval env idxenv e in
       begin match v with
-        | VIdxAbs (iv, e, env', idxenv') ->
-            let idxenv'' = Environment.extend iv i idxenv' in
-            eval env' idxenv'' e
+        | VIdxAbs (iv, e, env') ->
+            let e' = subst_idx (iv, i) e in
+            eval env' idxenv e'
         | _ -> runtime_error "not a index function"
       end
 

@@ -7,7 +7,7 @@ let tests = "Infer_test">:::([
     ELet ("age",
           EAbs ("x", ERecordGet (EVar "x", "age")),
           EVar "age"),
-    "forall 't0, 't1::#{age : 't0}. 't1 -> 't0"
+    "'t1 -> 't0"
   );
   (
     ELet ("s",
@@ -18,7 +18,7 @@ let tests = "Infer_test">:::([
                 ELet ("i",
                       EApp (EApp (EVar "s", EVar "k"), EVar "k"),
                       EVar "i"))),
-		"forall 't0. 't0 -> 't0"
+		"'t0 -> 't0"
   );
   ]|> List.map (fun (input, expected) ->
     expected>::(fun ctxt ->

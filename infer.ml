@@ -353,7 +353,7 @@ let eftv_polyty kenv pt =
   until_fix ftv_ty (fun eftv ->
     eftv
     |> MySet.map (fun tv ->
-        let k = Environment.lookup tv kenv in
+        let k = try Environment.lookup tv kenv with _ -> KUniv in
         freevar_kind k
       )
     |> MySet.bigunion
@@ -375,7 +375,7 @@ let eftv_tyenv kenv tyenv =
   until_fix ftv_tyenv (fun eftv ->
     eftv
     |> MySet.map (fun tv ->
-        let k = Environment.lookup tv kenv in
+        let k = try Environment.lookup tv kenv with _ -> KUniv in
         freevar_kind k
       )
     |> MySet.bigunion
@@ -411,10 +411,12 @@ let fresh_tyvar () =
 let forall_of t = Forall ([], t)
 
 (* \mathcal{WK} : (K, T, e) -> (K, S, M, t) *)
-let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
-  match exp with
+let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
   | EVar x ->
-      let Forall (xs, t) = Environment.lookup x tyenv in
+      let Forall (xs, t) =
+        try Environment.lookup x tyenv
+        with Environment.Not_bound -> failwith x
+      in
       let subst = List.map (fun (tv, _) -> (tv, TVar (fresh_tyvar ()))) xs in
       let kenv' =
         List.fold_left2 (fun kenv (tv, TVar s) (_, k) ->
@@ -422,7 +424,7 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
         ) kenv subst xs
       in
       let pty =
-        apply_subst_to_polyty subst (Forall (xs, t))
+        apply_subst_to_polyty subst (Forall ([], t))
       in
       (kenv', [], ET.EPolyInst (x, List.map snd subst), pty)
   | EInt i -> (kenv, [], ET.EInt i, forall_of TInt)
@@ -447,13 +449,13 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
   | EIfThenElse (e1, e2, e3) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
       let (kenv2, subst2, e2', Forall (_, t2')) = infer kenv1 (apply_subst_to_tyenv subst1 tyenv) e2 in
-      let (kenv3, subst3, e3', Forall (_, t3')) = infer kenv1 (apply_subst_to_tyenv (subst1 @ subst2) tyenv) e3 in
+      let (kenv3, subst3, e3', Forall (_, t3')) = infer kenv2 (apply_subst_to_tyenv (subst1 @ subst2) tyenv) e3 in
       let eqs = [(t1', TBool); (t2', t3')] in
       let (kenv4, subst4) = start_unify eqs kenv3 in
       (kenv4,
        subst1 @ subst2 @ subst3 @ subst4,
        apply_subst_to_exp subst4 (ET.EIfThenElse (e1', e2', e3')),
-       forall_of @@ apply_subst_to_ty subst4 t2'
+       forall_of @@ t3'
       )
   | EAbs (x, e) ->
       let tvar = fresh_tyvar () in
@@ -461,7 +463,7 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
       let kenv' = Environment.extend tvar KUniv kenv in
       let tyenv' = Environment.extend x (Forall ([], ty_arg)) tyenv in
       let (kenv', subst, e', Forall (xs, t')) = infer kenv' tyenv' e in
-      (kenv', subst, ET.EAbs (x, apply_subst_to_ty subst ty_arg, e'), apply_subst_to_polyty subst (Forall (xs, TFun (ty_arg, t'))))
+      (kenv', subst, ET.EAbs (x, apply_subst_to_ty subst ty_arg, e'), (forall_of @@ TFun (apply_subst_to_ty subst ty_arg, t')))
   | EApp (e1, e2) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
       let (kenv2, subst2, e2', Forall (_, t2')) = infer kenv1 (apply_subst_to_tyenv subst1 tyenv) e2 in
@@ -473,8 +475,9 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
       (kenv3,
        subst1 @ subst2 @ subst3,
        ET.EApp (apply_subst_to_exp (subst2 @ subst3) e1', apply_subst_to_exp subst3 e2'),
-       forall_of @@ apply_subst_to_ty (subst2 @ subst3) ty_ret)
+       forall_of @@ apply_subst_to_ty subst3 ty_ret)
   | ERecord xs ->
+      let xs = List.sort compare xs in
       let (kenv', subst', xs', ts') =
         List.fold_left (fun (kenv, subst, xs, ts) (l, e) ->
           let tyenv' = apply_subst_to_tyenv subst tyenv in
@@ -482,11 +485,10 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
           (kenv', subst @ subst', xs @ [l, e'], ts @ [l, t'])
         ) (kenv, [], [], []) xs
       in
-      let xs'' = List.sort compare xs' in
-      let ts'' = List.sort compare ts' in
+      let ts' = List.sort compare ts' in
       (
-        kenv', subst', ET.ERecord (List.map (fun (l, e) -> (l, apply_subst_to_exp subst' e)) xs''),
-        forall_of @@ TRecord (List.map (fun (l, t) -> (l, apply_subst_to_ty subst' t)) ts'')
+        kenv', subst', ET.ERecord (List.map (fun (l, e) -> (l, apply_subst_to_exp subst' e)) xs'),
+        forall_of @@ TRecord (List.map (fun (l, t) -> (l, apply_subst_to_ty subst' t)) ts')
       )
   | ERecordGet (e, l) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e in
@@ -512,7 +514,7 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
         |> Environment.extend tv1 KUniv
         |> Environment.extend tv2 (KRecord [l, TVar tv1])
       in
-      let eqs = [(TVar tv2, apply_subst_to_ty subst2 t1')] in
+      let eqs = [(TVar tv1, t2'); (TVar tv2, apply_subst_to_ty subst2 t1')] in
       let (kenv3, subst3) = start_unify eqs kenv2' in
       (kenv3, subst1 @ subst2 @ subst3,
        ET.ERecordModify (
@@ -520,7 +522,7 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
         apply_subst_to_ty subst3 (TVar tv2),
         l,
         apply_subst_to_exp subst3 e2'
-      ), forall_of @@ apply_subst_to_ty subst3 t1')
+      ), forall_of @@ apply_subst_to_ty subst3 (TVar tv2))
   | ELet (x, e1, e2) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
       let (kenv1', pt1) = closure kenv1 (apply_subst_to_tyenv subst1 tyenv) t1' in
@@ -529,11 +531,11 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
         |> apply_subst_to_tyenv subst1
         |> Environment.extend x pt1
       in
-      let (kenv2, subst2, e2', pt) = infer kenv1' tyenv' e2 in
+      let (kenv2, subst2, e2', (Forall (_, t2'))) = infer kenv1' tyenv' e2 in
       (
         kenv2, subst1 @ subst2,
         (ET.ELet (x, apply_subst_to_polyty subst2 pt1, apply_subst_to_exp subst2 @@ ET.EPolyGen (e1', pt1), e2')),
-        apply_subst_to_polyty subst2 pt
+        forall_of t2'
       )
 
 let canonical = function
@@ -541,20 +543,21 @@ let canonical = function
   | KRecord xs -> TRecord xs
 
 let rec instantiate kenv (Forall (xs, t)) =
-  (* let eftv = eftv_ty kenv t in *)
+  let eftv = eftv_ty kenv t in
   let vacuous =
     Environment.domain kenv
+    |> List.filter (fun tv -> not (MySet.member tv eftv))
     |> List.filter (fun tv -> not (MySet.member tv (freevar_kind (Environment.lookup tv kenv))))
   in
   let seq = List.map (fun tv ->
     let kenv' = Environment.remove tv kenv in
     let instance = canonical (Environment.lookup tv kenv) in
-    (kenv', (tv, instance))
+    (kenv', [(tv, instance)])
   ) vacuous
   in
   let (kenv', subst) =
     List.fold_left (fun (kenv, subst) (kenv', subst') ->
-      (kenv', subst' :: subst)
+      (kenv', subst @ subst')
     ) (kenv, []) seq
   in
   (kenv', subst)

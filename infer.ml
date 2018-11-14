@@ -536,8 +536,32 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp =
         apply_subst_to_polyty subst2 pt
       )
 
+let canonical = function
+  | KUniv -> TInt
+  | KRecord xs -> TRecord xs
+
+let rec instantiate kenv (Forall (xs, t)) =
+  (* let eftv = eftv_ty kenv t in *)
+  let vacuous =
+    Environment.domain kenv
+    |> List.filter (fun tv -> not (MySet.member tv (freevar_kind (Environment.lookup tv kenv))))
+  in
+  let seq = List.map (fun tv ->
+    let kenv' = Environment.remove tv kenv in
+    let instance = canonical (Environment.lookup tv kenv) in
+    (kenv', (tv, instance))
+  ) vacuous
+  in
+  let (kenv', subst) =
+    List.fold_left (fun (kenv, subst) (kenv', subst') ->
+      (kenv', subst' :: subst)
+    ) (kenv, []) seq
+  in
+  (kenv', subst)
+
 (* entrypoint *)
 let start exp =
   reset_counter ();
   let (kenv, _, exp, pty) = infer Environment.empty Environment.empty exp in
-  (exp, kenv, pty)
+  let (kenv', subst) = instantiate kenv pty in
+  (until_fix exp (apply_subst_to_exp subst), kenv', pty)

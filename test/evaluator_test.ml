@@ -94,7 +94,7 @@ let tests = "Evaluator_test">:::[
   "idxabs">::(fun ctxt ->
     (* ifun i1 -> 2 *)
 		let exp = EIdxAbs (1, EInt 2) in
-		let expected = VIdxAbs (1, EInt 2, Environment.empty ,Environment.empty) in
+		let expected = VIdxAbs (1, EInt 2, Environment.empty) in
 		assert_equal expected (Evaluator.start exp)
   );
   "idxabs_app_nonsense">::(fun ctxt ->

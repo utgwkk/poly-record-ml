@@ -69,7 +69,7 @@ type value =
   | VBool of bool
   | VProc of id * exp * env * idxenv
   | VArray of value array
-  | VIdxAbs of idxvar * exp * env * idxenv
+  | VIdxAbs of idxvar * exp * env
 
 and env = (id, value) Environment.t
 

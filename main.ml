@@ -23,7 +23,7 @@ let rec compile prompt chan k =
     | Typechecker.Kindcheck_failed -> retry k "[ERROR] kind check failed"
   end;
 
-  let compiled = Compiler.start kenv exp in
+  let compiled = Compiler.start exp in
   if_debug (fun () -> Printf.printf "(* Compiled exp *)\n%s\n\n" (Implementation.string_of_exp compiled));
   let value = Evaluator.start compiled in
   Printf.printf "val - = %s\n" (Implementation.string_of_value value);

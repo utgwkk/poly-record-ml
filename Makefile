@@ -5,6 +5,7 @@ TESTS = \
 				test/evaluator_test.ml \
 				test/typechecker_test.ml \
 				test/parser_test.ml \
+				test/infer_test.ml \
 				test/entrypoint.ml
 SOURCES = \
 					syntax.ml \

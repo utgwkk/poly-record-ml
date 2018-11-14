@@ -4,6 +4,10 @@ open Syntax
 open PolyRecord
 open ExplicitlyTyped
 
+let start = start Environment.empty
+
+let assert_equal expected actual = assert_equal ~printer:string_of_polyty expected actual
+
 let tests = "Typechecker_test">:::[
   "partial_check">:::[
     "x:forall X::U Y::U, X->Y->X |- x[int,bool] : int->bool->int">::(fun ctxt ->

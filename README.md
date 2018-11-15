@@ -1,4 +1,10 @@
 # poly-record-ml
+
+## requirements
+
+- menhir
+- ounit (for testing)
+
 ## BNF
 
 ```

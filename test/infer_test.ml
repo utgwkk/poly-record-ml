@@ -31,6 +31,18 @@ let tests = "Infer_test">:::([
                                   EIfThenElse (EVar "b", EApp (EApp (EVar "g1", EVar "z"), EVar "g2"), EApp (EApp (EVar "g2", EVar "z"), EVar "g1"))))))),
     "bool -> 't0 -> ('t0 -> (('t0 -> 't1) -> 't1) -> 't2) -> 't2"
   );
+	(
+		ELet ("f", EAbs ("x", EInt 3), EBinOp (Plus, EApp (EVar "f", EBool true), EApp (EVar "f", EInt 4))),
+		"int"
+	);
+  (
+    EAbs ("b",
+          ELet ("f",
+                EAbs ("x", EVar "x"),
+                ELet ("g", EAbs ("y", EVar "y"),
+                      EIfThenElse (EVar "b", EApp (EVar "f", EVar "g"), EApp (EVar "g", EVar "f"))))),
+    "bool -> 't0 -> 't0"
+  );
   ]|> List.map (fun (input, expected) ->
     expected>::(fun ctxt ->
       let (_, _, actual) = start input in

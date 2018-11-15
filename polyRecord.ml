@@ -56,23 +56,14 @@ let string_of_polyty = function
       Printf.sprintf "Forall ([%s], %s)" (String.concat "; " xs') (string_of_ty t)
 
 let pp_polyty (Forall (bs, t)) =
-  let rec collect_tyvar set = function
-    | TVar i -> MySet.singleton i
-    | TFun (a, b) -> MySet.union (collect_tyvar set b) (collect_tyvar set a)
-    | TRecord xs -> List.fold_left MySet.union MySet.empty (List.map (fun (_, t) -> collect_tyvar set t) xs)
-    | _ -> MySet.empty
-  and collect_tyvar_k = function
-    | KUniv -> MySet.empty
-    | KRecord xs -> collect_tyvar MySet.empty (TRecord xs)
-  in
   let collect_tyvar_polyty (Forall (xs, t)) =
-    MySet.union (collect_tyvar MySet.empty t) (List.fold_left (fun set (v, k) -> MySet.union (collect_tyvar_k k) (MySet.insert v set)) MySet.empty xs)
+    xs |> List.map fst
   in
   let rec tyvar_map count = function
     | [] -> []
     | h :: t -> (h, "t" ^ string_of_int count) :: tyvar_map (count + 1) t
   in
-  let tyvars = tyvar_map 0 (List.sort compare @@ MySet.to_list @@ collect_tyvar_polyty (Forall (bs, t)))
+  let tyvars = tyvar_map 0 (collect_tyvar_polyty (Forall (bs, t)))
   in
   let rec pp_ty t =
     let rec pp_ty' t =

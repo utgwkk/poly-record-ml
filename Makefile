@@ -1,5 +1,6 @@
 PACKS = oUnit
 OCAMLYACC = menhir
+SRCDIR = src
 TESTS = \
 				test/compiler_test.ml \
 				test/evaluator_test.ml \
@@ -7,7 +8,7 @@ TESTS = \
 				test/parser_test.ml \
 				test/infer_test.ml \
 				test/entrypoint.ml
-SOURCES = \
+SOURCES = $(addprefix $(SRCDIR)/,\
 					syntax.ml \
 					environment.ml environment.mli \
 					mySet.ml mySet.mli \
@@ -19,9 +20,9 @@ SOURCES = \
 					compiler.ml \
 					typechecker.ml \
 					parser.mly \
-					lexer.mll \
+					lexer.mll) \
 					$(MAIN)
-MAIN = main.ml
+MAIN = $(SRCDIR)/main.ml
 RESULT = prog
 
 all: frontend

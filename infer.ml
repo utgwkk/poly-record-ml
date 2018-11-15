@@ -302,7 +302,7 @@ and apply_subst_to_polyty subs = function
   | Forall (xs, t) ->
       let xs' =
         xs
-        |> List.map (fun (tv, k) -> (apply_subst_to_tyvar subs tv, apply_subst_to_kind subs k))
+        |> List.map (fun (tv, k) -> (tv, apply_subst_to_kind subs k))
       in Forall (xs', apply_subst_to_ty subs t)
 
 (* FTV(ty) *)
@@ -574,6 +574,13 @@ let rec instantiate kenv (Forall (xs, t)) =
   in
   (kenv', subst)
 
+let rec uniq compare = function
+  | [] -> []
+  | [x] -> [x]
+  | h1 :: h2 :: tl ->
+      if compare h1 h2 then uniq compare (h2 :: tl)
+      else h1 :: uniq compare (h2 :: tl)
+
 (* entrypoint *)
 let start exp =
   reset_counter ();
@@ -588,5 +595,11 @@ let start exp =
     kenv'
     |> Environment.domain
     |> List.rev_map (fun x -> (x, Environment.lookup x kenv))
+    |> List.sort (fun (tv1, k1) (tv2, k2) ->
+        if MySet.member tv2 (freevar_kind k1) then 1
+        else if MySet.member tv1 (freevar_kind k2) then -1
+        else 0
+      )
+    |> uniq (fun x y -> fst x = fst y)
   in
   (exp', kenv', Forall (xs, ty))

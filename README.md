@@ -9,9 +9,9 @@
          | <boolean>
          | <term> <op> <term>
          | "if" <term> "then" <term> "else" <term>
-         | "fun" <variable> "->" <term>
+         | "fun" <variable>+ "->" <term>
          | <term> <term>
-         | "let" <variable> "=" <term> "in" <term>
+         | "let" <variable>+ "=" <term> "in" <term>
          | "{" <record> "}"
          | <term> "." <label>
          | "modify" "(" <term> "," <label> "," <term> ")"

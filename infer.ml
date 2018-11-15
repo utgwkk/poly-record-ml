@@ -450,11 +450,11 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
       let (kenv2, subst2, e2', Forall (_, t2')) = infer kenv1 (apply_subst_to_tyenv subst1 tyenv) e2 in
       let (kenv3, subst3, e3', Forall (_, t3')) = infer kenv2 (apply_subst_to_tyenv (subst1 @ subst2) tyenv) e3 in
-      let eqs = [(t1', TBool); (t2', t3')] in
+      let eqs = [(apply_subst_to_ty subst3 t1', TBool); (t2', t3')] in
       let (kenv4, subst4) = start_unify eqs kenv3 in
       (kenv4,
        subst1 @ subst2 @ subst3 @ subst4,
-       apply_subst_to_exp subst4 (ET.EIfThenElse (e1', e2', e3')),
+       apply_subst_to_exp (subst3 @ subst4) (ET.EIfThenElse (e1', e2', e3')),
        forall_of @@ t3'
       )
   | EAbs (x, e) ->
@@ -552,7 +552,8 @@ let rec instantiate kenv (Forall (xs, t)) =
   let seq = List.map (fun tv ->
     let kenv' = Environment.remove tv kenv in
     let instance = canonical (Environment.lookup tv kenv) in
-    (kenv', [(tv, instance)])
+    let s = (tv, instance) in
+    (subst_kenv s kenv', [(tv, instance)])
   ) vacuous
   in
   let (kenv', subst) =

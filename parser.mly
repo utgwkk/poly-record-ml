@@ -30,7 +30,11 @@ Expr :
 | LtExpr { $1 }
 
 FunExpr :
-  FUN x=ID RARROW e=Expr { EAbs (x, e)}
+  FUN FunBody { $2 }
+
+FunBody :
+  x=ID RARROW e=Expr { EAbs (x, e) }
+| x=ID fb=FunBody { EAbs (x, fb) }
 
 LetExpr :
   LET x=ID EQ e1=Expr IN e2=Expr { ELet (x, e1, e2) }

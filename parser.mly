@@ -1,6 +1,6 @@
 %{
   open Syntax
-  open ExplicitlyTyped
+  open PolyRecord
 %}
 
 %token LPAREN RPAREN SEMISEMI
@@ -9,62 +9,14 @@
 %token IF THEN ELSE TRUE FALSE
 %token RARROW FUN
 %token LRECORDPAREN RRECORDPAREN (* { } *)
-%token POLY
 %token DOT MODIFY COMMA
 
 %token <int> INTV
 %token <Syntax.id> ID
 
-(* Type specifier *)
-%token COLON
-%token INT BOOL
-%token <Syntax.tyvar> TVAR
-%token FORALL COLONCOLON
-%token KLPAREN (* #{ *)
-
 %start main
-%type <ExplicitlyTyped.exp> main
+%type <PolyRecord.exp> main
 %%
-
-(* monotypes *)
-Type :
-  FunType { $1 }
-
-FunType :
-  t1=AType RARROW t2=FunType { TFun (t1, t2) }
-| AType { $1 }
-
-AType :
-  INT { TInt }
-| BOOL { TBool }
-| TVAR { TVar $1 }
-| LRECORDPAREN TypeRecordBody RRECORDPAREN { TRecord $2 }
-| LPAREN Type RPAREN { $2 }
-
-TypeRecordBody :
-  separated_nonempty_list(COMMA, TypeRecordField) { $1 }
-
-TypeRecordField :
-| l=ID COLON t=Type { (l, t) }
-
-(* kinds *)
-Kind :
-  KLPAREN KindRecordBody RRECORDPAREN { KRecord $2 }
-
-KindRecordBody :
-  separated_nonempty_list(COMMA, TypeRecordField) { $1 }
-
-(* polytypes *)
-PolyType :
-  Type { Forall ([], $1) }
-| FORALL bs=BoundBody DOT t=Type { Forall (bs, t) }
-
-BoundBody :
-  separated_nonempty_list(COMMA, BoundPart) { $1 }
-
-BoundPart :
-  tv=TVAR COLONCOLON k=Kind { (tv, k) }
-| tv=TVAR { (tv, KUniv) }
 
 (* expressions *)
 
@@ -78,11 +30,10 @@ Expr :
 | LtExpr { $1 }
 
 FunExpr :
-  FUN x=ID COLON t=AType RARROW e=Expr { EAbs (x, t, e)}
-| FUN LPAREN x=ID COLON t=Type RPAREN RARROW e=Expr { EAbs (x, t, e)}
+  FUN x=ID RARROW e=Expr { EAbs (x, e)}
 
 LetExpr :
-  LET x=ID COLON pt=PolyType EQ e1=Expr IN e2=Expr { ELet (x, pt, e1, e2) }
+  LET x=ID EQ e1=Expr IN e2=Expr { ELet (x, e1, e2) }
 
 IfExpr :
   IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }
@@ -104,14 +55,13 @@ AppExpr :
 | AExpr { $1 }
 
 AExpr :
-  x=ID is=loption(PolyInstBody) { EPolyInst (x, is) }
+  x=ID { EVar x }
 | RecordExpr { $1 }
 | INTV { EInt $1 }
 | TRUE { EBool true }
 | FALSE { EBool false }
-| e=AExpr COLON t=Type DOT l=ID { ERecordGet (e, t, l) } (* e:t.l *)
-| MODIFY LPAREN e1=AExpr COLON t=Type COMMA l=ID COMMA e2=Expr RPAREN { ERecordModify (e1, t, l, e2) }
-| POLY LPAREN e=AExpr COLON pt=PolyType RPAREN { EPolyGen (e, pt) }
+| e=AExpr DOT l=ID { ERecordGet (e, l) } (* e.l *)
+| MODIFY LPAREN e1=AExpr COMMA l=ID COMMA e2=Expr RPAREN { ERecordModify (e1, l, e2) }
 | LPAREN Expr RPAREN { $2 }
 
 RecordExpr :
@@ -119,7 +69,3 @@ RecordExpr :
 
 RecordField :
   l=ID EQ e=Expr { (l, e) }
-
-PolyInstBody :
-  t=Type r=PolyInstBody { t :: r }
-| t=AType { [t] }

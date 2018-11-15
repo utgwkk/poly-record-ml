@@ -2,18 +2,21 @@ open OUnit2
 open Compiler
 open Syntax
 
+module PL = PolyRecord
 module ET = ExplicitlyTyped
 module Impl = Implementation
+
+let start = start Environment.empty
 
 let tests = "Compiler_test">:::[
   "tycon_test">:::[
     "no_bound">::(fun ctxt ->
-      let input = ET.Forall ([], TInt) in
+      let input = PL.Forall ([], TInt) in
       let expected = Impl.Forall ([], TInt) in
       assert_equal expected (tycon input)
     );
     "universal">::(fun ctxt ->
-      let input = ET.Forall ([1, KUniv], TInt) in
+      let input = PL.Forall ([1, KUniv], TInt) in
       let expected = Impl.Forall ([1, KUniv], TInt) in
       assert_equal expected (tycon input)
     );
@@ -27,10 +30,10 @@ let tests = "Compiler_test">:::[
        * idx(a, t2) ==> idx(b, t2) ==> idx(a, t3) ==> t2 -> t3
        * *)
       let input =
-        ET.Forall ([
-          (2, ET.KRecord [("a", TInt); ("b", TInt)]);
-          (3, ET.KRecord [("a", TVar 2)])
-        ], ET.TFun (ET.TVar 2, ET.TVar 3))
+        PL.Forall ([
+          (2, PL.KRecord [("a", TInt); ("b", TInt)]);
+          (3, PL.KRecord [("a", TVar 2)])
+        ], PL.TFun (PL.TVar 2, PL.TVar 3))
       in
       let expected =
         Impl.Forall ([
@@ -140,7 +143,7 @@ let tests = "Compiler_test">:::[
        * *)
       let input = ET.EPolyGen (
         ET.EInt 1,
-        ET.Forall ([1, KUniv; 2, KUniv; 3, KUniv], TInt)
+        PL.Forall ([1, KUniv; 2, KUniv; 3, KUniv], TInt)
       ) in
       let expected = Impl.EInt 1 in
       assert_equal expected (start input)
@@ -151,7 +154,7 @@ let tests = "Compiler_test">:::[
        * *)
       let input = ET.EPolyGen (
         ET.EInt 1,
-        ET.Forall ([1, KRecord [("a", TInt); ("b", TInt)]], TInt)
+        PL.Forall ([1, KRecord [("a", TInt); ("b", TInt)]], TInt)
       ) in
       let expected = Impl.EIdxAbs (1, Impl.EIdxAbs (2, Impl.EInt 1)) in
       assert_equal expected (start input)
@@ -162,7 +165,7 @@ let tests = "Compiler_test">:::[
        * *)
       let input = ET.EPolyGen (
         ET.EInt 1,
-        ET.Forall ([
+        PL.Forall ([
           1, KRecord [("a", TInt); ("b", TInt)];
           2, KRecord [("a", TInt)];
         ], TInt)
@@ -177,7 +180,7 @@ let tests = "Compiler_test">:::[
        * *)
       let input = ET.ELet (
         "x",
-        ET.Forall ([
+        PL.Forall ([
           1, KRecord [("a", TInt); ("b", TInt)];
         ], TVar 1),
         ET.ERecord [("a", EInt 1); ("b", EInt 2)],

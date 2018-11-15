@@ -1,55 +1,6 @@
+module PL = PolyRecord
 module ET = ExplicitlyTyped
 module Impl = Implementation
-
-(* IdxSet(tv::k) *)
-let idxset_kind tv = function
-  | ET.KUniv -> []
-  | ET.KRecord xs ->
-      List.map (fun (l, _) -> (l, Impl.TVar tv)) xs
-
-(* IdxSet(F) where k = {{F}}*)
-let idxset xs =
-  let rec inner = function
-  | [] -> []
-  | (tv, k) :: tl -> idxset_kind tv k :: inner tl
-  in inner xs |> List.flatten
-
-(* (\tau)^* = \tau *)
-let rec monotycon = function
-  | ET.TVar tv -> Impl.TVar tv
-  | ET.TInt -> Impl.TInt
-  | ET.TBool -> Impl.TBool
-  | ET.TFun (t1, t2) -> Impl.TFun (monotycon t1, monotycon t2)
-  | ET.TRecord ts ->
-      let ts' =
-        ts
-        |> List.map (fun (l, t) -> (l, monotycon t))
-        |> List.sort compare
-      in
-      Impl.TRecord ts'
-
-let kcon = function
-  | ET.KUniv -> Impl.KUniv
-  | ET.KRecord xs ->
-      let xs' =
-        xs
-        |> List.map (fun (l, t) -> (l, monotycon t))
-      in
-      Impl.KRecord xs'
-
-(* (forall t_1::k_1. \cdots forall t_n::k_n.\tau)^*
- * = forall t_1::k_1. \cdots forall t_n::k_n.
- *   idx(l_1, t^'_1) => ... => idx(l_n, t^'_n) => \tau
- * *)
-let rec tycon (ET.Forall (xs, t)) =
-  let idxsets = idxset xs in
-  let xs' =
-    xs
-    |> List.map (fun (tv, k) -> (tv, kcon k))
-  in
-  match idxsets with
-  | [] -> Impl.Forall (xs', monotycon t)
-  | _ -> Impl.Forall (xs', Impl.TIdxFun (idxsets, monotycon t))
 
 (* counter for fresh index variables *)
 let __counter = ref 1
@@ -61,6 +12,72 @@ let fresh_idxvar () =
   let rval = !__counter in
   __counter := !__counter + 1;
   rval
+
+(* IdxSet(tv::k) *)
+let idxset_kind tv = function
+  | PL.KUniv -> []
+  | PL.KRecord xs ->
+      List.map (fun (l, _) -> (l, Impl.TVar tv)) xs
+
+(* IdxSet(F) where k = {{F}}*)
+let idxset xs =
+  let rec inner = function
+  | [] -> []
+  | (tv, k) :: tl -> idxset_kind tv k :: inner tl
+  in inner xs |> List.flatten
+
+(* IdxSet(K) *)
+let idxset_kenv kenv =
+  let dom = Environment.domain kenv in
+  let idxset =
+    dom
+    |> List.map (fun tv ->
+      let k = Environment.lookup tv kenv in
+      idxset_kind tv k
+    )
+    |> List.flatten
+  in
+  idxset
+  |> List.fold_left (fun env (l, t) ->
+      Environment.extend (l, t) (Impl.IVar (fresh_idxvar())) env
+    ) Environment.empty
+
+(* (\tau)^* = \tau *)
+let rec monotycon = function
+  | PL.TVar tv -> Impl.TVar tv
+  | PL.TInt -> Impl.TInt
+  | PL.TBool -> Impl.TBool
+  | PL.TFun (t1, t2) -> Impl.TFun (monotycon t1, monotycon t2)
+  | PL.TRecord ts ->
+      let ts' =
+        ts
+        |> List.map (fun (l, t) -> (l, monotycon t))
+        |> List.sort compare
+      in
+      Impl.TRecord ts'
+
+let kcon = function
+  | PL.KUniv -> Impl.KUniv
+  | PL.KRecord xs ->
+      let xs' =
+        xs
+        |> List.map (fun (l, t) -> (l, monotycon t))
+      in
+      Impl.KRecord xs'
+
+(* (forall t_1::k_1. \cdots forall t_n::k_n.\tau)^*
+ * = forall t_1::k_1. \cdots forall t_n::k_n.
+ *   idx(l_1, t^'_1) => ... => idx(l_n, t^'_n) => \tau
+ * *)
+let rec tycon (PL.Forall (xs, t)) =
+  let idxsets = idxset xs in
+  let xs' =
+    xs
+    |> List.map (fun (tv, k) -> (tv, kcon k))
+  in
+  match idxsets with
+  | [] -> Impl.Forall (xs', monotycon t)
+  | _ -> Impl.Forall (xs', Impl.TIdxFun (idxsets, monotycon t))
 
 let rec compile (lbenv : Impl.lbenv) tyenv = function
   | ET.EPolyInst (x, xs) ->
@@ -105,7 +122,7 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       let e1' = compile lbenv tyenv e1 in
       let e2' = compile lbenv tyenv e2 in
       Impl.EApp (e1', e2')
-  | ET.EPolyGen (e, (ET.Forall (xs, _))) ->
+  | ET.EPolyGen (e, (PL.Forall (xs, _))) ->
       let xs' = idxset xs in
       let label_tv_idxvar_tuple_list =
         List.map (fun (l, t) -> (l, t, fresh_idxvar ())) xs'
@@ -154,6 +171,7 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       Impl.EArrayModify (e1', idx, e2')
 
 (* entrypoint *)
-let start exp =
+let start kenv exp =
   reset_counter ();
-  compile Environment.empty Environment.empty exp
+  let lbenv = idxset_kenv kenv in
+  compile lbenv Environment.empty exp

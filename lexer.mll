@@ -2,17 +2,13 @@
   open Parser
 
   let reservedWords = [
-    ("bool", BOOL);
     ("else", ELSE);
     ("false", FALSE);
-    ("forall", FORALL);
     ("fun", FUN);
     ("if", IF);
     ("in", IN);
-    ("int", INT);
     ("let", LET);
     ("modify", MODIFY);
-    ("poly", POLY);
     ("then", THEN);
     ("true", TRUE);
   ] |> List.sort compare
@@ -31,10 +27,7 @@ rule main = parse
   | ";;" { SEMISEMI }
   | "{" { LRECORDPAREN }
   | "}" { RRECORDPAREN }
-  | "#{" { KLPAREN }
   | "->" { RARROW }
-  | ":" { COLON }
-  | "::" { COLONCOLON }
   | "." { DOT }
   | "," { COMMA }
   | "=" { EQ }
@@ -48,9 +41,5 @@ rule main = parse
         List.assoc id reservedWords
       with
       _ -> Parser.ID id
-    }
-  | "'t" (number as strnum)
-    {
-      TVAR (int_of_string strnum)
     }
 	| eof { exit 0 }

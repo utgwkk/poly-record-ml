@@ -190,7 +190,11 @@ let rec unify eqs kenv subst ksubst =
               unify eqs' kenv' subst' ksubst'
           | KRecord xs ->
               let eqs' =
-                List.map (fun (l, _) -> (List.assoc l xs, List.assoc l ys)) xs @ rest
+                List.map (fun (l, k) ->
+                  try (k, List.assoc l ys)
+                  with Not_found ->
+                    raise (Unification_failed (Printf.sprintf "field '%s' not found on %s" l (string_of_kind (KRecord ys))))
+                ) xs @ rest
                 |> subst_eqs [(tv, TRecord ys)]
               in
               let kenv' = subst_kenv (tv, TRecord ys) kenv in
@@ -205,7 +209,8 @@ let rec unify eqs kenv subst ksubst =
               else raise (Unification_failed "not a subset record")
           end
       | TVar tv, t -> (* (II) *)
-          if ftv tv t then raise (Unification_failed "free variable occurence")
+          if ftv tv t then
+            raise (Unification_failed (Printf.sprintf "free variable %d occurs inside %s" tv (string_of_ty t)))
           else
             let k = Environment.lookup tv kenv in
             begin match k with
@@ -220,7 +225,7 @@ let rec unify eqs kenv subst ksubst =
       | t, TVar tv -> (* (II) *)
           let eqs' = (TVar tv, t) :: rest in
           unify eqs' kenv subst ksubst
-      | _ -> raise (Unification_failed "unify failed")
+      | _ -> raise (Unification_failed (Printf.sprintf "unify failed: (%s, %s)" (string_of_ty t1) (string_of_ty t2)))
 
 let start_unify eqs kenv = unify eqs kenv [] Environment.empty
 

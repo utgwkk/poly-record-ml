@@ -2,6 +2,8 @@ open Syntax
 open PolyRecord
 module ET = ExplicitlyTyped
 
+exception Not_bound of id
+
 (* E *)
 type eqs = (ty * ty) list
 
@@ -415,7 +417,7 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
   | EVar x ->
       let Forall (xs, t) =
         try Environment.lookup x tyenv
-        with Environment.Not_bound -> failwith x
+        with Environment.Not_bound -> raise (Not_bound x)
       in
       let subst = List.map (fun (tv, _) -> (tv, TVar (fresh_tyvar ()))) xs in
       let kenv' =

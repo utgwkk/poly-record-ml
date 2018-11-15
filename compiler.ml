@@ -171,6 +171,7 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       Impl.EArrayModify (e1', idx, e2')
 
 (* entrypoint *)
-let start exp =
+let start kenv exp =
   reset_counter ();
-  compile Environment.empty Environment.empty exp
+  let lbenv = idxset_kenv kenv in
+  compile lbenv Environment.empty exp

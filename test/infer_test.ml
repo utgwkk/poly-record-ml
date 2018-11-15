@@ -20,6 +20,17 @@ let tests = "Infer_test">:::([
                       EVar "i"))),
 		"'t0 -> 't0"
   );
+  (
+    EAbs ("b",
+          EAbs ("f",
+                ELet ("g1",
+                      EAbs ("x", EApp (EVar "x", EVar "f")),
+                      ELet ("g2",
+                            EAbs ("x", EApp (EVar "x", EVar "f")),
+                            EAbs ("z",
+                                  EIfThenElse (EVar "b", EApp (EApp (EVar "g1", EVar "z"), EVar "g2"), EApp (EApp (EVar "g2", EVar "z"), EVar "g1"))))))),
+    "bool -> 't0 -> ('t0 -> (('t0 -> 't1) -> 't1) -> 't2) -> 't2"
+  );
   ]|> List.map (fun (input, expected) ->
     expected>::(fun ctxt ->
       let (_, _, actual) = start input in

@@ -30,14 +30,21 @@ Expr :
 | LtExpr { $1 }
 
 FunExpr :
-  FUN FunBody { $2 }
-
-FunBody :
-  x=ID RARROW e=Expr { EAbs (x, e) }
-| x=ID fb=FunBody { EAbs (x, fb) }
+  FUN xs=nonempty_list(ID) RARROW e=Expr {
+    List.fold_right (fun y e ->
+      EAbs (y, e)
+    ) xs e
+  }
 
 LetExpr :
-  LET x=ID EQ e1=Expr IN e2=Expr { ELet (x, e1, e2) }
+  LET x=ID xs=list(ID) EQ e1=Expr IN e2=Expr {
+    let e1 =
+      List.fold_right (fun y e ->
+        EAbs (y, e)
+      ) xs e1
+    in
+    ELet (x, e1, e2)
+  }
 
 IfExpr :
   IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }

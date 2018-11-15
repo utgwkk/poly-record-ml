@@ -567,5 +567,10 @@ let rec instantiate kenv (Forall (xs, t)) =
 let start exp =
   reset_counter ();
   let (kenv, _, exp, pty) = infer Environment.empty Environment.empty exp in
-  let (kenv', subst) = instantiate kenv pty in
-  (until_fix exp (apply_subst_to_exp subst), kenv', pty)
+  let (kenv', subst, exp', _) =
+    until_fix (kenv, [], exp, pty) (fun (kenv, subst, exp, pty) ->
+      let (kenv, subst) = instantiate kenv pty in
+      (List.fold_right subst_kenv subst kenv, subst, apply_subst_to_exp subst exp, apply_subst_to_polyty subst pty)
+    )
+  in
+  (exp', kenv', pty)

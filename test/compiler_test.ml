@@ -6,6 +6,8 @@ module PL = PolyRecord
 module ET = ExplicitlyTyped
 module Impl = Implementation
 
+let start = start Environment.empty
+
 let tests = "Compiler_test">:::[
   "tycon_test">:::[
     "no_bound">::(fun ctxt ->

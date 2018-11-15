@@ -424,11 +424,15 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
         try Environment.lookup x tyenv
         with Environment.Not_bound -> raise (Not_bound x)
       in
-      let subst = List.map (fun (tv, _) -> (tv, TVar (fresh_tyvar ()))) xs in
+      let cor_fresh_tyvars_and_kind = List.map (fun (tv, k) -> (tv, fresh_tyvar (), k)) xs in
+      let subst =
+        cor_fresh_tyvars_and_kind
+        |> List.map (fun (tv, s, _) -> (tv, TVar s))
+      in
       let kenv' =
-        List.fold_left2 (fun kenv (tv, TVar s) (_, k) ->
+        List.fold_left (fun kenv (tv, s, k) ->
           Environment.extend s (apply_subst_to_kind subst k) kenv
-        ) kenv subst xs
+        ) kenv cor_fresh_tyvars_and_kind
       in
       let pty =
         apply_subst_to_polyty subst (Forall ([], t))

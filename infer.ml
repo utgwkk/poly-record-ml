@@ -314,12 +314,12 @@ let freevar_kind = function
   | KRecord xs -> freevar_ty (TRecord xs)
 
 (* FTV(polyty) *)
-let freevar_polyty (Forall (xs, t))=
+let freevar_polyty (Forall (xs, t)) =
   List.fold_left (fun (fvs, bs) (tv, k) ->
     let fv_k = freevar_kind k in
     let bs' = MySet.insert tv bs in
     (MySet.union fv_k (MySet.diff (freevar_ty t) bs'), bs')
-  ) (MySet.empty, MySet.empty) xs
+  ) (freevar_ty t, MySet.empty) xs
   |> fst
 
 (* FTV(tyenv) *)

@@ -2,6 +2,8 @@
 ## BNF
 
 ```
+<program> ::= <term> ";;"
+
 <term> ::= <variable>
          | <integer>
          | <boolean>

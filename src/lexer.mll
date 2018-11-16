@@ -14,10 +14,10 @@
   ] |> List.sort compare
 }
 
-let alphabet = ['a'-'z']
+let small = ['a'-'z']
 let digit = ['0'-'9']
 let number = digit+
-let ident = alphabet (alphabet | digit | ['_' '\''])*
+let ident = small (small | digit | ['_' '\''])*
 
 rule main = parse
   | [' ' '\009' '\012' '\n']+     { main lexbuf }

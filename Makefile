@@ -32,7 +32,8 @@ frontend: bc
 .PHONY: test
 
 test: MAIN = $(TESTS)
-test: bc
+test: OCAMLFLAGS = -g
+test: nc
 	./$(RESULT); rm $(RESULT)
 
 include OCamlMakefile

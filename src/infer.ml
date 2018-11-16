@@ -556,6 +556,15 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
         (ET.ELet (x, apply_subst_to_polyty subst2 pt1, apply_subst_to_exp subst2 @@ ET.EPolyGen (e1', pt1), e2')),
         forall_of t2'
       )
+  | EStatement (e1, e2) ->
+      let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
+      let (kenv2, subst2, e2', Forall (_, t2')) = infer kenv1 (apply_subst_to_tyenv subst1 tyenv) e2 in
+      let eqs = [(t1', TUnit)] in
+      let (kenv3, subst3) = start_unify eqs kenv in
+      (kenv3,
+       subst1 @ subst2 @ subst3,
+       ET.EStatement (apply_subst_to_exp (subst2 @ subst3) e1', apply_subst_to_exp subst3 e2'),
+       forall_of @@ apply_subst_to_ty subst3 t2')
 
 let canonical = function
   | KUniv -> TInt

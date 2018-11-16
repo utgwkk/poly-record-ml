@@ -26,6 +26,7 @@ rule main = parse
   | "()" { UNIT }
   | "(" { LPAREN }
   | ")" { RPAREN }
+  | ";" { SEMI }
   | ";;" { SEMISEMI }
   | "{" { LRECORDPAREN }
   | "}" { RRECORDPAREN }

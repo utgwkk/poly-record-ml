@@ -66,6 +66,7 @@ type exp =
   | EArrayModify of exp * idx * exp
   | EIdxAbs of idxvar * exp
   | EIdxApp of exp * idx
+  | EStatement of exp * exp
 
 type value =
   | VInt of int
@@ -117,6 +118,8 @@ let rec string_of_exp = function
       Printf.sprintf "EIdxAbs (%d, %s)" i (string_of_exp e)
   | EIdxApp (e, i) ->
       Printf.sprintf "EIdxApp (%s, %s)" (string_of_exp e) (string_of_idx i)
+  | EStatement (e1, e2) ->
+      Printf.sprintf "EStatement (%s, %s)" (string_of_exp e1) (string_of_exp e2)
 
 let rec string_of_value = function
   | VInt i -> string_of_int i

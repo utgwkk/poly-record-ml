@@ -174,6 +174,10 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       in
       let e2' = compile lbenv tyenv e2 in
       Impl.EArrayModify (e1', idx, e2')
+  | ET.EStatement (e1, e2) ->
+      let e1' = compile lbenv tyenv e1 in
+      let e2' = compile lbenv tyenv e2 in
+      Impl.EStatement (e1', e2')
 
 (* entrypoint *)
 let start kenv exp =

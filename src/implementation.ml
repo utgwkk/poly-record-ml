@@ -64,6 +64,7 @@ type exp =
   | EArray of exp list
   | EArrayGet of exp * idx
   | EArrayModify of exp * idx * exp
+  | EArrayAssign of exp * idx * exp
   | EIdxAbs of idxvar * exp
   | EIdxApp of exp * idx
   | EStatement of exp * exp
@@ -114,6 +115,8 @@ let rec string_of_exp = function
       Printf.sprintf "EArrayGet (%s, %s)" (string_of_exp e) (string_of_idx i)
   | EArrayModify (e1, i, e2) ->
       Printf.sprintf "EArrayModify (%s, %s, %s)" (string_of_exp e1) (string_of_idx i) (string_of_exp e2)
+  | EArrayAssign (e1, i, e2) ->
+      Printf.sprintf "EArrayAssign (%s, %s, %s)" (string_of_exp e1) (string_of_idx i) (string_of_exp e2)
   | EIdxAbs (i, e) ->
       Printf.sprintf "EIdxAbs (%d, %s)" i (string_of_exp e)
   | EIdxApp (e, i) ->

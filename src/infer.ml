@@ -444,6 +444,7 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
       (kenv', [], ET.EPolyInst (x, List.map snd subst), pty)
   | EInt i -> (kenv, [], ET.EInt i, forall_of TInt)
   | EBool b -> (kenv, [], ET.EBool b, forall_of TBool)
+  | EUnit -> (kenv, [], ET.EUnit, forall_of TUnit)
   | EBinOp (op, e1, e2) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
       let (kenv2, subst2, e2', Forall (_, t2')) = infer kenv1 (apply_subst_to_tyenv subst1 tyenv) e2 in
@@ -472,6 +473,9 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
        apply_subst_to_exp (subst3 @ subst4) (ET.EIfThenElse (e1', e2', e3')),
        forall_of @@ t3'
       )
+  | EUnitAbs e ->
+      let (kenv, subst, e', Forall (_, t')) = infer kenv tyenv e in
+      (kenv, subst, ET.EUnitAbs e', (forall_of @@ TFun (TUnit, t')))
   | EAbs (x, e) ->
       let tvar = fresh_tyvar () in
       let ty_arg = TVar tvar in

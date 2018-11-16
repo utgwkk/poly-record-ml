@@ -4,6 +4,7 @@ type ty =
   | TVar of tyvar
   | TInt
   | TBool
+  | TUnit
   | TFun of ty * ty
   | TRecord of (label * ty) list
 
@@ -17,9 +18,11 @@ type exp =
   | EVar of id
   | EInt of int
   | EBool of bool
+  | EUnit
   | EBinOp of binOp * exp * exp
   | EIfThenElse of exp * exp * exp
   | EAbs of id * exp
+  | EUnitAbs of exp
   | EApp of exp * exp
   | ELet of id * exp * exp
   | ERecord of (label * exp) list
@@ -30,6 +33,7 @@ let rec string_of_ty = function
   | TVar i -> "TVar " ^ string_of_int i
   | TInt -> "TInt"
   | TBool -> "TBool"
+  | TUnit -> "TUnit"
   | TFun (t1, t2) -> Printf.sprintf "TFun (%s, %s)" (string_of_ty t1) (string_of_ty t2)
   | TRecord xs ->
       let xs' =
@@ -70,6 +74,7 @@ let pp_polyty (Forall (bs, t)) =
       match t with
       | TInt -> "int"
       | TBool -> "bool"
+      | TUnit -> "unit"
       | TVar i -> "'" ^ List.assoc i tyvars
       | TFun (a, b) -> begin match (a, b) with
           | TFun _, _ -> Printf.sprintf "(%s) -> %s" (pp_ty' a) (pp_ty' b)
@@ -100,6 +105,7 @@ let rec string_of_exp = function
       Printf.sprintf "EVar \"%s\"" x
   | EInt i -> "EInt " ^ string_of_int i
   | EBool b -> "EBool " ^ string_of_bool b
+  | EUnit -> "EUnit"
   | EBinOp (op, e1, e2) ->
       let opstr = match op with
       | Plus -> "Plus"
@@ -110,6 +116,8 @@ let rec string_of_exp = function
       Printf.sprintf "EIfThenElse (%s, %s, %s)" (string_of_exp e1) (string_of_exp e2) (string_of_exp e3)
   | EAbs (x, e) ->
       Printf.sprintf "EAbs (\"%s\", %s)" x (string_of_exp e)
+  | EUnitAbs e ->
+      Printf.sprintf "EUnitAbs %s" (string_of_exp e)
   | EApp (e1, e2) ->
       Printf.sprintf "EApp (%s, %s)" (string_of_exp e1) (string_of_exp e2)
   | ELet (x, e1, e2) ->
@@ -126,6 +134,7 @@ let rec ty_eq t1 t2 = match t1, t2 with
   | TVar i1, TVar i2 -> i1 = i2
   | TInt, TInt -> true
   | TBool, TBool -> true
+  | TUnit, TUnit -> true
   | TFun (t1, t1r), TFun (t2, t2r) ->
       ty_eq t1 t2 && ty_eq t1r t2r
   | TRecord xs, TRecord ys -> begin

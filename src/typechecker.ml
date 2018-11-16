@@ -52,6 +52,7 @@ let rec type_check kenv tyenv = function
        instantiate pt xs
   | EInt _ -> forall_of TInt
   | EBool _ -> forall_of TBool
+  | EUnit -> forall_of TUnit
   | EBinOp (op, e1, e2) ->
       let (Forall (_, t1)) = type_check kenv tyenv e1 in
       let (Forall (_, t2)) = type_check kenv tyenv e2 in
@@ -75,6 +76,9 @@ let rec type_check kenv tyenv = function
       let tyenv' = Environment.extend x (Forall ([], t)) tyenv in
       let (Forall (xs, t')) = type_check kenv tyenv' e in
       Forall (xs, TFun (t, t'))
+  | EUnitAbs e ->
+      let (Forall (xs, t')) = type_check kenv tyenv e in
+      Forall (xs, TFun (TUnit, t'))
   | EApp (e1, e2) ->
       let (Forall (_, t1)) = type_check kenv tyenv e1 in
       let (Forall (_, t2)) = type_check kenv tyenv e2 in

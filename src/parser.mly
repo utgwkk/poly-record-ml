@@ -10,6 +10,7 @@
 %token RARROW FUN
 %token LRECORDPAREN RRECORDPAREN (* { } *)
 %token DOT MODIFY COMMA
+%token UNIT
 
 %token <int> INTV
 %token <Syntax.id> ID
@@ -35,6 +36,7 @@ FunExpr :
       EAbs (y, e)
     ) xs e
   }
+| FUN UNIT RARROW e=Expr { EUnitAbs e }
 
 LetExpr :
   LET x=ID xs=list(ID) EQ e1=Expr IN e2=Expr {
@@ -45,6 +47,7 @@ LetExpr :
     in
     ELet (x, e1, e2)
   }
+| LET x=ID UNIT EQ e1=Expr IN e2=Expr { ELet (x, EUnitAbs e1, e2) }
 
 IfExpr :
   IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }
@@ -73,6 +76,7 @@ AExpr :
 | FALSE { EBool false }
 | e=AExpr DOT l=ID { ERecordGet (e, l) } (* e.l *)
 | MODIFY LPAREN e1=AExpr COMMA l=ID COMMA e2=Expr RPAREN { ERecordModify (e1, l, e2) }
+| UNIT { EUnit }
 | LPAREN Expr RPAREN { $2 }
 
 RecordExpr :

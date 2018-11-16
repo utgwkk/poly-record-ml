@@ -174,6 +174,16 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       in
       let e2' = compile lbenv tyenv e2 in
       Impl.EArrayModify (e1', idx, e2')
+  | ET.ERecordAssign (e1, t, l, e2) ->
+      let e1' = compile lbenv tyenv e1 in
+      let t' = monotycon t in
+      let idx =
+        try Impl.INat (Impl.idx_value l t')
+        with Impl.Undefined_index_value ->
+          Environment.lookup (l, t') lbenv
+      in
+      let e2' = compile lbenv tyenv e2 in
+      Impl.EArrayAssign (e1', idx, e2')
   | ET.EStatement (e1, e2) ->
       let e1' = compile lbenv tyenv e1 in
       let e2' = compile lbenv tyenv e2 in

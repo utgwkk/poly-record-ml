@@ -282,6 +282,13 @@ let rec apply_subst_to_exp subs = function
         l,
         apply_subst_to_exp subs e2
       )
+  | ET.ERecordAssign (e1, t, l, e2) ->
+      ET.ERecordAssign (
+        apply_subst_to_exp subs e1,
+        apply_subst_to_ty subs t,
+        l,
+        apply_subst_to_exp subs e2
+      )
   | e -> e
 
 (* S(k) *)
@@ -542,6 +549,25 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
         l,
         apply_subst_to_exp subst3 e2'
       ), forall_of @@ apply_subst_to_ty subst3 (TVar tv2))
+  | ERecordAssign (e1, l, e2) ->
+      let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
+      let (kenv2, subst2, e2', Forall (_, t2')) = infer kenv1 (apply_subst_to_tyenv subst1 tyenv) e2 in
+      let tv1 = fresh_tyvar () in
+      let tv2 = fresh_tyvar () in
+      let kenv2' =
+        kenv2
+        |> Environment.extend tv1 KUniv
+        |> Environment.extend tv2 (KRecord [l, TVar tv1])
+      in
+      let eqs = [(TVar tv1, t2'); (TVar tv2, apply_subst_to_ty subst2 t1')] in
+      let (kenv3, subst3) = start_unify eqs kenv2' in
+      (kenv3, subst1 @ subst2 @ subst3,
+       ET.ERecordAssign (
+        apply_subst_to_exp (subst2 @ subst3) e1',
+        apply_subst_to_ty subst3 (TVar tv2),
+        l,
+        apply_subst_to_exp subst3 e2'
+      ), forall_of @@ TUnit)
   | ELet (x, e1, e2) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
       let (kenv1', pt1) = closure kenv1 (apply_subst_to_tyenv subst1 tyenv) t1' in
@@ -560,7 +586,7 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
       let (kenv2, subst2, e2', Forall (_, t2')) = infer kenv1 (apply_subst_to_tyenv subst1 tyenv) e2 in
       let eqs = [(t1', TUnit)] in
-      let (kenv3, subst3) = start_unify eqs kenv in
+      let (kenv3, subst3) = start_unify eqs kenv2 in
       (kenv3,
        subst1 @ subst2 @ subst3,
        ET.EStatement (apply_subst_to_exp (subst2 @ subst3) e1', apply_subst_to_exp subst3 e2'),

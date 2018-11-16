@@ -46,6 +46,14 @@ let rec subst_idx (idx, idxr) = function
           | INat i' -> INat i'
       in
       EArrayModify (e1', i', e2')
+  | EArrayAssign (e1, i, e2) ->
+      let e1' = subst_idx (idx, idxr) e1 in
+      let e2' = subst_idx (idx, idxr) e2 in
+      let i' = match i with
+          | IVar i' -> if i' = idx then idxr else IVar i'
+          | INat i' -> INat i'
+      in
+      EArrayAssign (e1', i', e2')
   | EIdxAbs (i, e) ->
       let e' = subst_idx (idx, idxr) e in
       EIdxAbs (i, e')
@@ -59,7 +67,7 @@ let rec subst_idx (idx, idxr) = function
   | e -> e
 
 let rec eval_idx idxenv = function
-  | IVar i -> eval_idx idxenv (Environment.lookup i idxenv)
+  | IVar i -> Printf.printf "%d\n" i; eval_idx idxenv (Environment.lookup i idxenv)
   | INat i -> i
 
 let rec calc_binop op lhs rhs = match (op, lhs, rhs) with
@@ -121,6 +129,17 @@ let rec eval (env : env) (idxenv : idxenv) = function
             let arr' = Array.copy arr in
             arr'.(idx') <- v2;
             VArray arr'
+        | _ -> runtime_error "not an array"
+      end
+  | EArrayAssign (e1, i, e2) ->
+      let v1 = eval env idxenv e1 in
+      let idx = eval_idx idxenv i in
+      let idx' = idx - 1 in
+      let v2 = eval env idxenv e2 in
+      begin match v1 with
+        | VArray arr ->
+            arr.(idx') <- v2;
+            VUnit
         | _ -> runtime_error "not an array"
       end
   | EIdxAbs (iv, e) -> VIdxAbs (iv, e, env)

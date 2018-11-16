@@ -225,7 +225,11 @@ let rec unify eqs kenv subst ksubst =
       | t, TVar tv -> (* (II) *)
           let eqs' = (TVar tv, t) :: rest in
           unify eqs' kenv subst ksubst
-      | _ -> raise (Unification_failed (Printf.sprintf "unify failed: (%s, %s)" (string_of_ty t1) (string_of_ty t2)))
+      | _ -> (* failure *)
+          let error_msg = match t1, t2 with
+              | _, TFun _ -> Printf.sprintf "%s is not a function type" (string_of_ty t1)
+              | _ -> Printf.sprintf "type mismatch (%s, %s)" (string_of_ty t1) (string_of_ty t2)
+          in raise (Unification_failed error_msg)
 
 let start_unify eqs kenv = unify eqs kenv [] Environment.empty
 

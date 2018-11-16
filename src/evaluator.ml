@@ -132,6 +132,9 @@ let rec eval (env : env) (idxenv : idxenv) = function
             eval env' idxenv e'
         | _ -> runtime_error "not a index function"
       end
+  | EStatement (e1, e2) ->
+      ignore (eval env idxenv e1);
+      eval env idxenv e2
 
 (* entrypoint *)
 let start exp = eval Environment.empty Environment.empty exp

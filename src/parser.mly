@@ -11,6 +11,7 @@
 %token LRECORDPAREN RRECORDPAREN (* { } *)
 %token DOT MODIFY COMMA
 %token UNIT
+%token SEMI
 
 %token <int> INTV
 %token <Syntax.id> ID
@@ -28,7 +29,7 @@ Expr :
   LetExpr { $1 }
 | FunExpr { $1 }
 | IfExpr { $1 }
-| LtExpr { $1 }
+| ContinueExpr { $1 }
 
 FunExpr :
   FUN xs=nonempty_list(ID) RARROW e=Expr {
@@ -51,6 +52,10 @@ LetExpr :
 
 IfExpr :
   IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }
+
+ContinueExpr :
+  e1=LtExpr SEMI e2=ContinueExpr { EStatement (e1, e2) }
+| LtExpr { $1 }
 
 LtExpr :
   e1=PExpr LT e2=PExpr { EBinOp (Lt, e1,e2) }

@@ -28,7 +28,6 @@ main :
 Expr :
   LetExpr { $1 }
 | FunExpr { $1 }
-| IfExpr { $1 }
 | ContinueExpr { $1 }
 
 FunExpr :
@@ -50,11 +49,12 @@ LetExpr :
   }
 | LET x=ID UNIT EQ e1=Expr IN e2=Expr { ELet (x, EUnitAbs e1, e2) }
 
-IfExpr :
-  IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }
-
 ContinueExpr :
   e1=LtExpr SEMI e2=ContinueExpr { EStatement (e1, e2) }
+| IfExpr { $1 }
+
+IfExpr :
+  IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }
 | LtExpr { $1 }
 
 LtExpr :

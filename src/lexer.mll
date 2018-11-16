@@ -31,6 +31,7 @@ rule main = parse
   | "{" { LRECORDPAREN }
   | "}" { RRECORDPAREN }
   | "->" { RARROW }
+  | "<-" { LARROW }
   | "." { DOT }
   | "," { COMMA }
   | "=" { EQ }

@@ -10,6 +10,7 @@ type ty =
   | TVar of tyvar
   | TInt
   | TBool
+  | TUnit
   | TFun of ty * ty
   | TRecord of (label * ty) list
   | TIdxFun of idxty list * ty
@@ -53,9 +54,11 @@ type exp =
   | EVar of id
   | EInt of int
   | EBool of bool
+  | EUnit
   | EBinOp of binOp * exp * exp
   | EIfThenElse of exp * exp * exp
   | EAbs of id * exp
+  | EUnitAbs of exp
   | EApp of exp * exp
   | ELet of id * exp * exp
   | EArray of exp list
@@ -67,6 +70,7 @@ type exp =
 type value =
   | VInt of int
   | VBool of bool
+  | VUnit
   | VProc of id * exp * env * idxenv
   | VArray of value array
   | VIdxAbs of idxvar * exp * env
@@ -85,6 +89,7 @@ let rec string_of_exp = function
   | EVar x -> "EVar \"" ^ x ^ "\""
   | EInt i -> "EInt " ^ string_of_int i
   | EBool b -> "EBool " ^ string_of_bool b
+  | EUnit -> "EUnit"
   | EBinOp (op, e1, e2) ->
       let opstr = match op with
       | Plus -> "Plus"
@@ -95,6 +100,8 @@ let rec string_of_exp = function
       Printf.sprintf "EIfThenElse (%s, %s, %s)" (string_of_exp e1) (string_of_exp e2) (string_of_exp e3)
   | EAbs (x, e) ->
       Printf.sprintf "EAbs (\"%s\", %s)" x (string_of_exp e)
+  | EUnitAbs e ->
+      Printf.sprintf "EUnitAbs %s" (string_of_exp e)
   | EApp (e1, e2) ->
       Printf.sprintf "EApp (%s, %s)" (string_of_exp e1) (string_of_exp e2)
   | ELet (x, e1, e2) ->
@@ -114,6 +121,7 @@ let rec string_of_exp = function
 let rec string_of_value = function
   | VInt i -> string_of_int i
   | VBool b -> string_of_bool b
+  | VUnit -> "()"
   | VProc _ -> "<fun>"
   | VArray arr ->
       let xs = Array.to_list arr in

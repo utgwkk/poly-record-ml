@@ -18,6 +18,9 @@ let rec subst_idx (idx, idxr) = function
   | EAbs (x, e) ->
       let e' = subst_idx (idx, idxr) e in
       EAbs (x, e')
+  | EUnitAbs e ->
+      let e' = subst_idx (idx, idxr) e in
+      EUnitAbs e'
   | EApp (e1, e2) ->
       let e1' = subst_idx (idx, idxr) e1 in
       let e2' = subst_idx (idx, idxr) e2 in
@@ -69,6 +72,7 @@ let rec eval (env : env) (idxenv : idxenv) = function
   | EVar x -> Environment.lookup x env
   | EInt i -> VInt i
   | EBool b -> VBool b
+  | EUnit -> VUnit
   | EBinOp (op, e1, e2) ->
       let v1 = eval env idxenv e1 in
       let v2 = eval env idxenv e2 in
@@ -81,6 +85,7 @@ let rec eval (env : env) (idxenv : idxenv) = function
             else eval env idxenv e3
         | _ -> runtime_error "condition must be boolean"
       end
+  | EUnitAbs e -> VProc ("__unused__", e, env, idxenv)
   | EAbs (x, e) -> VProc (x, e, env, idxenv)
   | EApp (e1, e2) ->
       let v1 = eval env idxenv e1 in

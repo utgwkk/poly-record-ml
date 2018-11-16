@@ -47,6 +47,7 @@ let rec monotycon = function
   | PL.TVar tv -> Impl.TVar tv
   | PL.TInt -> Impl.TInt
   | PL.TBool -> Impl.TBool
+  | PL.TUnit -> Impl.TUnit
   | PL.TFun (t1, t2) -> Impl.TFun (monotycon t1, monotycon t2)
   | PL.TRecord ts ->
       let ts' =
@@ -104,6 +105,7 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       end
   | ET.EInt i -> Impl.EInt i
   | ET.EBool b -> Impl.EBool b
+  | ET.EUnit -> Impl.EUnit
   | ET.EBinOp (op, e1, e2) ->
       let e1' = compile lbenv tyenv e1 in
       let e2' = compile lbenv tyenv e2 in
@@ -118,6 +120,9 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       let tyenv' = Environment.extend x t' tyenv in
       let e' = compile lbenv tyenv' e in
       Impl.EAbs (x, e')
+  | ET.EUnitAbs e ->
+      let e' = compile lbenv tyenv e in
+      Impl.EUnitAbs e'
   | ET.EApp (e1, e2) ->
       let e1' = compile lbenv tyenv e1 in
       let e2' = compile lbenv tyenv e2 in

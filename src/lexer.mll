@@ -23,6 +23,7 @@ let ident = small (capital | small | digit | ['_' '\''])*
 rule main = parse
   | [' ' '\009' '\012' '\n']+     { main lexbuf }
   | "-"? number { INTV (int_of_string (Lexing.lexeme lexbuf)) }
+  | "()" { UNIT }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | ";;" { SEMISEMI }

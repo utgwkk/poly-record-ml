@@ -9,9 +9,11 @@ type exp =
   | EPolyInst of id * ty list
   | EInt of int
   | EBool of bool
+  | EUnit
   | EBinOp of binOp * exp * exp
   | EIfThenElse of exp * exp * exp
   | EAbs of id * ty * exp
+  | EUnitAbs of exp
   | EApp of exp * exp
   | EPolyGen of exp * polyty
   | ELet of id * polyty * exp * exp
@@ -28,6 +30,7 @@ let rec string_of_exp = function
       Printf.sprintf "EPolyInst (\"%s\", [%s])" x (String.concat "; " xs')
   | EInt i -> "EInt " ^ string_of_int i
   | EBool b -> "EBool " ^ string_of_bool b
+  | EUnit -> "EUnit"
   | EBinOp (op, e1, e2) ->
       let opstr = match op with
       | Plus -> "Plus"
@@ -38,6 +41,8 @@ let rec string_of_exp = function
       Printf.sprintf "EIfThenElse (%s, %s, %s)" (string_of_exp e1) (string_of_exp e2) (string_of_exp e3)
   | EAbs (x, t, e) ->
       Printf.sprintf "EAbs (\"%s\", %s, %s)" x (PolyRecord.string_of_ty t) (string_of_exp e)
+  | EUnitAbs e ->
+      Printf.sprintf "EUnitAbs %s" (string_of_exp e)
   | EApp (e1, e2) ->
       Printf.sprintf "EApp (%s, %s)" (string_of_exp e1) (string_of_exp e2)
   | EPolyGen (e, pt) ->

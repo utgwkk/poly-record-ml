@@ -134,7 +134,7 @@ let rec type_check kenv tyenv = function
         | None -> raise Typecheck_failed
       end
   | EStatement (e1, e2) ->
-      let (Forall (_, t1)) = type_check kenv tyenv e1 in
+      ignore (type_check kenv tyenv e1);
       let (Forall (_, t2)) = type_check kenv tyenv e2 in
       forall_of t2
 

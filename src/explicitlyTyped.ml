@@ -44,7 +44,7 @@ let rec string_of_exp = function
   | EAbs (x, t, e) ->
       Printf.sprintf "EAbs (\"%s\", %s, %s)" x (PolyRecord.string_of_ty t) (string_of_exp e)
   | EUnitAbs e ->
-      Printf.sprintf "EUnitAbs %s" (string_of_exp e)
+      Printf.sprintf "EUnitAbs (%s)" (string_of_exp e)
   | EApp (e1, e2) ->
       Printf.sprintf "EApp (%s, %s)" (string_of_exp e1) (string_of_exp e2)
   | EPolyGen (e, pt) ->

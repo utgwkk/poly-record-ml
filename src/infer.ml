@@ -570,7 +570,12 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
       ), forall_of @@ TUnit)
   | ELet (x, e1, e2) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
-      let (kenv1', pt1) = closure kenv1 (apply_subst_to_tyenv subst1 tyenv) t1' in
+      let (kenv1', pt1) =
+        match e1 with
+        | EUnitAbs _
+        | EAbs _ -> closure kenv1 (apply_subst_to_tyenv subst1 tyenv) t1'
+        | _ -> (kenv1, Forall ([], t1'))
+      in
       let tyenv' =
         tyenv
         |> apply_subst_to_tyenv subst1

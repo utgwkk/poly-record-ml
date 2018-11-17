@@ -600,8 +600,10 @@ let rec instantiate kenv (Forall (xs, t)) =
   let eftv = eftv_ty kenv t in
   let vacuous =
     Environment.domain kenv
-    |> List.filter (fun tv -> not (MySet.member tv eftv))
-    |> List.filter (fun tv -> not (MySet.member tv (freevar_kind (Environment.lookup tv kenv))))
+    |> List.filter (fun tv ->
+        let kftv = freevar_kind (Environment.lookup tv kenv) in
+        not (MySet.member tv (MySet.union kftv eftv))
+    )
   in
   let seq = List.map (fun tv ->
     let kenv' = Environment.remove tv kenv in

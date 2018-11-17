@@ -103,7 +103,7 @@ let rec string_of_exp = function
   | EAbs (x, e) ->
       Printf.sprintf "EAbs (\"%s\", %s)" x (string_of_exp e)
   | EUnitAbs e ->
-      Printf.sprintf "EUnitAbs %s" (string_of_exp e)
+      Printf.sprintf "EUnitAbs (%s)" (string_of_exp e)
   | EApp (e1, e2) ->
       Printf.sprintf "EApp (%s, %s)" (string_of_exp e1) (string_of_exp e2)
   | ELet (x, e1, e2) ->

@@ -13,19 +13,24 @@
 <term> ::= <variable>
          | <integer>
          | <boolean>
+         | "()"
          | <term> <op> <term>
          | "if" <term> "then" <term> "else" <term>
-         | "fun" <variable>+ "->" <term>
+         | "fun" (<variable>+ | "()") "->" <term>
          | <term> <term>
-         | "let" <variable>+ "=" <term> "in" <term>
+         | "let" <variable> (<variable>+ | "()")? "=" <term> "in" <term>
          | "{" <record> "}"
          | <term> "." <label>
+         | <term> "." <label> "<-" <term>
          | "modify" "(" <term> "," <label> "," <term> ")"
-<variable> ::= <alphabet> <alphanum>+
-<alphanum> ::= <alphabet> | <number>
+         | <term> ";" <term>
+<variable> ::= <small> | <alphanum>+
+<alphanum> ::= <alphabet> | <number> | ['_' '\'']
 <integer> ::= '-'? <number>
 <number> ::= <digit>+
-<alphabet> ::= ['a' - 'z']
+<alphabet> ::= <small> | <capital>
+<small> ::= ['a' - 'z']
+<capital> ::= ['A' - 'Z']
 <digit> ::= ['0' - '9']
 <boolean> ::= "true" | "false"
 <record_body> ::= <record_field> ("," <record_field>)*

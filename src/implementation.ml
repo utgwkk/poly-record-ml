@@ -93,10 +93,7 @@ let rec string_of_exp = function
   | EBool b -> "EBool " ^ string_of_bool b
   | EUnit -> "EUnit"
   | EBinOp (op, e1, e2) ->
-      let opstr = match op with
-      | Plus -> "Plus"
-      | Mult -> "Mult"
-      | Lt -> "Lt"
+      let opstr = string_of_binOp op
       in Printf.sprintf "EBinOp (%s, %s, %s)" opstr (string_of_exp e1) (string_of_exp e2)
   | EIfThenElse (e1, e2, e3) ->
       Printf.sprintf "EIfThenElse (%s, %s, %s)" (string_of_exp e1) (string_of_exp e2) (string_of_exp e3)

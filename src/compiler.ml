@@ -53,7 +53,6 @@ let rec monotycon = function
       let ts' =
         ts
         |> List.map (fun (l, t) -> (l, monotycon t))
-        |> List.sort compare
       in
       Impl.TRecord ts'
 
@@ -152,7 +151,6 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
   | ET.ERecord xs ->
       let xs' =
         xs
-        |> List.sort compare
         |> List.map (fun (_, e) -> compile lbenv tyenv e)
       in
       Impl.EArray xs'

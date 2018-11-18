@@ -16,12 +16,10 @@ let union_record xs ys =
   let xs' =
     xs
     |> List.map fst
-    |> List.sort compare
   in
   let ys' =
     ys
     |> List.map fst
-    |> List.sort compare
   in
   let rec inner xs ys = match xs with
     | [] -> ys
@@ -38,12 +36,10 @@ let intersect_record xs ys =
   let xs' =
     xs
     |> List.map fst
-    |> List.sort compare
   in
   let ys' =
     ys
     |> List.map fst
-    |> List.sort compare
   in
   let rec inner xs ys = match xs with
     | [] -> []
@@ -65,8 +61,8 @@ let dom_is_subset xs ys =
 let dom_eq xs ys =
   let xs' = List.map fst xs in
   let ys' = List.map fst ys in
-  List.for_all (fun x -> List.mem x ys') xs' &&
-  List.for_all (fun y -> List.mem y xs') ys'
+  try List.fold_left2 (fun b x y -> b && x = y) true xs' ys'
+  with _ -> false
 
 exception Unification_failed of string
 
@@ -274,7 +270,6 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
        ET.EApp (apply_subst_to_exp (subst2 @ subst3) e1', apply_subst_to_exp subst3 e2'),
        forall_of @@ apply_subst_to_ty subst3 ty_ret)
   | ERecord xs ->
-      let xs = List.sort compare xs in
       let (kenv', subst', xs', ts') =
         List.fold_left (fun (kenv, subst, xs, ts) (l, e) ->
           let tyenv' = apply_subst_to_tyenv subst tyenv in
@@ -282,7 +277,6 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
           (kenv', subst @ subst', xs @ [l, e'], ts @ [l, t'])
         ) (kenv, [], [], []) xs
       in
-      let ts' = List.sort compare ts' in
       (
         kenv', subst', ET.ERecord (List.map (fun (l, e) -> (l, apply_subst_to_exp subst' e)) xs'),
         forall_of @@ TRecord (List.map (fun (l, t) -> (l, apply_subst_to_ty subst' t)) ts')

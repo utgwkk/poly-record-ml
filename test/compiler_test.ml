@@ -102,17 +102,17 @@ let tests = "Compiler_test">:::[
       assert_equal expected (start input)
     );
     "record_construct">::(fun ctxt ->
-      (* {c=1, b=2, a=3} => {3, 2, 1} *)
-      let input = ET.ERecord [("c", EInt 1); ("b", EInt 2); ("a", EInt 3)] in
+      (* {a=3, b=2, c=1} => {3, 2, 1} *)
+      let input = ET.ERecord [("a", EInt 3); ("b", EInt 2); ("c", EInt 1)] in
       let expected = Impl.EArray [EInt 3; EInt 2; EInt 1] in
       assert_equal expected (start input)
     );
     "record_access">::(fun ctxt ->
-      (* ({c=1, b=2, a=3}:{c:int, b:int: a:int}).a
+      (* ({a=3, b=2, c=1}:{c:int, b:int: a:int}).a
        * => {3, 2, 1}[1] *)
       let input = ET.ERecordGet (
-          ERecord [("c", EInt 1); ("b", EInt 2); ("a", EInt 3)],
-          TRecord [("c", TInt); ("b", TInt); ("a", TInt)],
+          ERecord [("a", EInt 3); ("b", EInt 2); ("c", EInt 1)],
+          TRecord [("a", TInt); ("b", TInt); ("c", TInt)],
           "a"
         ) in
       let expected = Impl.EArrayGet (
@@ -122,11 +122,11 @@ let tests = "Compiler_test">:::[
       assert_equal expected (start input)
     );
     "record_modification">::(fun ctxt ->
-      (* modify({c=1, b=2, a=3}:{c:int, b:int: a:int}, a, 100)
+      (* modify({a=3, b=2, c=1}:{c:int, b:int: a:int}, a, 100)
        * => modify({3, 2, 1}, 1, 100) *)
       let input = ET.ERecordModify (
-          ERecord [("c", EInt 1); ("b", EInt 2); ("a", EInt 3)],
-          TRecord [("c", TInt); ("b", TInt); ("a", TInt)],
+          ERecord [("a", EInt 3); ("b", EInt 2); ("c", EInt 1)],
+          TRecord [("a", TInt); ("b", TInt); ("c", TInt)],
           "a",
           EInt 100
         ) in

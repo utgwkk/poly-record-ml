@@ -35,5 +35,9 @@ let tests = "Parser test">:::([
                 EBinOp (Plus, ERecordGet (EVar "x", "age"), EInt 1)),
           EApp (EVar "nextage", ERecord [("age", EInt 22)]))
   );
+  (
+    "{z = 26, d = 4, a = 1};;",
+    ERecord ["a", EInt 1; "d", EInt 4; "z", EInt 26]
+  );
   ] |> List.map (fun (s, e) -> s >:: fun ctxt -> assert_parse e s)
 )

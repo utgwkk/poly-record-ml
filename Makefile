@@ -16,6 +16,7 @@ SOURCES = $(addprefix $(SRCDIR)/,\
 					polyRecord.ml \
 					explicitlyTyped.ml \
 					implementation.ml \
+					subst.ml \
 					infer.ml \
 					compiler.ml \
 					typechecker.ml \

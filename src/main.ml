@@ -8,21 +8,29 @@ let rec compile prompt chan k =
   flush stdout;
 
   try
+    (* parsing *)
     let exp = Parser.main Lexer.main (Lexing.from_channel chan) in
     if_debug (fun () -> Printf.printf "(* Input *)\n%s\n\n" (PolyRecord.string_of_exp exp));
 
+    (* type inference *)
     let (exp, kenv, pty) = Infer.start exp in
     if_debug (fun () ->
       Printf.printf "(* Type inference *)\n%s\n%s\n\n" (ExplicitlyTyped.string_of_exp exp) (PolyRecord.pp_polyty pty);
     );
 
+    (* type check *)
     let pty = Typechecker.start kenv exp in
     if_debug (fun () -> Printf.printf "(* Type check *)\n%s\n\n" (PolyRecord.string_of_polyty pty));
 
+    (* compilation*)
     let compiled = Compiler.start kenv exp in
     if_debug (fun () -> Printf.printf "(* Compiled exp *)\n%s\n\n" (Implementation.string_of_exp compiled));
+
+    (* evaluation *)
     let value = Evaluator.start compiled in
     Printf.printf "val - = %s\n" (Implementation.string_of_value value);
+
+    (* continue *)
     k ()
   with
     | Infer.Not_bound x -> retry k ("[ERROR] unbound value " ^ x)

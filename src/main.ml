@@ -37,7 +37,7 @@ let rec compile prompt chan k =
     | Infer.Unification_failed s -> retry k ("[ERROR] type inference failed: " ^ s) 
     | Typechecker.Typecheck_failed -> retry k "[ERROR] type check failed"
     | Typechecker.Kindcheck_failed -> retry k "[ERROR] kind check failed"
-    | Evaluator.RuntimeError s -> retry k ("[ERROR] runtime error" ^ s)
+    | Evaluator.RuntimeError s -> retry k ("[ERROR] runtime error: " ^ s)
 
 and retry k s =
   print_endline s;

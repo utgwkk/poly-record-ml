@@ -105,7 +105,6 @@ let rec type_check kenv tyenv = function
   | ERecord xs ->
       let xs' =
         xs
-        |> List.sort compare
         |> List.map (fun (l, t) ->
             let (Forall (_, t')) = type_check kenv tyenv t in
             (l, t')

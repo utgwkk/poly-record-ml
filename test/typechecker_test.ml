@@ -85,24 +85,24 @@ let tests = "Typechecker_test">:::[
         let expected = Forall ([], TInt) in
         assert_equal expected (start input)
       );
-      "|- {c=1, b=2, a=3} : {a:int, b:int, c:int}">::(fun ctxt ->
-        let input = ERecord [("c", EInt 1); ("b", EInt 2); ("a", EInt 3)] in
+      "|- {a=3, b=2, c=1} : {a:int, b:int, c:int}">::(fun ctxt ->
+        let input = ERecord [("a", EInt 3); ("b", EInt 2); ("c", EInt 1)] in
         let expected = Forall ([], TRecord [("a", TInt); ("b", TInt); ("c", TInt)]) in
         assert_equal expected (start input)
       );
-      "|- {c=1, b=2, a=3}:{a:int, b:int, c:int}.a : int">::(fun ctxt ->
+      "|- {a=3, b=2, c=1}:{a:int, b:int, c:int}.a : int">::(fun ctxt ->
         let input = ERecordGet (
-            ERecord [("c", EInt 1); ("b", EInt 2); ("a", EInt 3)],
-            TRecord [("c", TInt); ("b", TInt); ("a", TInt)],
+            ERecord [("a", EInt 3); ("b", EInt 2); ("c", EInt 1)],
+            TRecord [("a", TInt); ("b", TInt); ("c", TInt)],
             "a"
           ) in
         let expected = Forall ([], TInt) in
         assert_equal expected (start input)
       );
-      "|- modify({c=1, b=2, a=3}:{c:int, b:int: a:int}, a, 100) : {a:int, b:int, c:int}">::(fun ctxt ->
+      "|- modify({a=3, b=2, c=1}:{a:int, b:int: c:int}, a, 100) : {a:int, b:int, c:int}">::(fun ctxt ->
         let input = ERecordModify (
-            ERecord [("c", EInt 1); ("b", EInt 2); ("a", EInt 3)],
-            TRecord [("c", TInt); ("b", TInt); ("a", TInt)],
+            ERecord [("a", EInt 3); ("b", EInt 2); ("c", EInt 1)],
+            TRecord [("a", TInt); ("b", TInt); ("c", TInt)],
             "a",
             EInt 100
           ) in

@@ -89,8 +89,11 @@ AExpr :
 | UNIT { EUnit }
 | LPAREN Expr RPAREN { $2 }
 
-RecordExpr :
-  LRECORDPAREN separated_nonempty_list(COMMA, RecordField) RRECORDPAREN { ERecord $2 } (* record constructor *)
+RecordExpr : (* record constructor *)
+  LRECORDPAREN separated_nonempty_list(COMMA, RecordField) RRECORDPAREN {
+    let body = List.sort compare $2 in
+    ERecord body
+  }
 
 RecordField :
   l=ID EQ e=Expr { (l, e) }

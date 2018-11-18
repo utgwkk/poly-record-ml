@@ -33,6 +33,8 @@ let rec compile prompt chan k =
     (* continue *)
     k ()
   with
+    | Failure s -> retry k ("[ERROR] failure: " ^ s)
+    | Parser.Error -> retry k "[ERROR] syntax error"
     | Infer.Not_bound x -> retry k ("[ERROR] unbound value " ^ x)
     | Unify.Unification_failed s -> retry k ("[ERROR] type inference failed: " ^ s) 
     | Typechecker.Typecheck_failed -> retry k "[ERROR] type check failed"

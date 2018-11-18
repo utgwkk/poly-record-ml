@@ -163,3 +163,103 @@ and polyty_eq (Forall (xs, t1)) (Forall (ys, t2)) =
     with _ -> false
   ) && ty_eq t1 t2
 
+(* tyvar \in FTV(ty) *)
+let rec ftv tv = function
+  | TVar tv' -> tv = tv'
+  | TFun (t1, t2) -> ftv tv t1 || ftv tv t2
+  | TRecord xs -> List.exists (fun (_, t) -> ftv tv t) xs
+  | _ -> false
+
+(* FTV(ty) *)
+let rec freevar_ty = function
+  | TVar tv -> MySet.singleton tv
+  | TFun (t1, t2) -> MySet.union (freevar_ty t1) (freevar_ty t2)
+  | TRecord xs ->
+      List.fold_left (fun ftv (_, t) ->
+        MySet.union ftv (freevar_ty t)
+      ) MySet.empty xs
+  | _ -> MySet.empty
+
+(* FTV(k) *)
+let freevar_kind = function
+  | KUniv -> MySet.empty
+  | KRecord xs -> freevar_ty (TRecord xs)
+
+(* FTV(polyty) *)
+let freevar_polyty (Forall (xs, t)) =
+  List.fold_left (fun (fvs, bs) (tv, k) ->
+    let fv_k = freevar_kind k in
+    let bs' = MySet.insert tv bs in
+    (MySet.union fv_k (MySet.diff (freevar_ty t) bs'), bs')
+  ) (freevar_ty t, MySet.empty) xs
+  |> fst
+
+(* FTV(tyenv) *)
+let freevar_tyenv tyenv =
+  Environment.fold_right (fun pt ftv ->
+    MySet.insert (freevar_polyty pt) ftv
+  ) tyenv MySet.empty
+  |> MySet.bigunion
+
+(* EFTV(kenv, ty) *)
+let eftv_ty kenv ty =
+  let ftv_ty = freevar_ty ty in
+  Misc.until_fix ftv_ty (fun eftv ->
+    eftv
+    |> MySet.map (fun tv ->
+        let k = Environment.lookup tv kenv in
+        freevar_kind k
+      )
+    |> MySet.bigunion
+    |> MySet.union eftv
+  )
+
+(* EFTV(kenv, polyty) *)
+let eftv_polyty kenv pt =
+  let ftv_ty = freevar_polyty pt in
+  Misc.until_fix ftv_ty (fun eftv ->
+    eftv
+    |> MySet.map (fun tv ->
+        let k = try Environment.lookup tv kenv with _ -> KUniv in
+        freevar_kind k
+      )
+    |> MySet.bigunion
+    |> MySet.union eftv
+  )
+
+(* EFTV(kenv, tyenv) *)
+let eftv_tyenv kenv tyenv =
+  let ftv_tyenv =
+    tyenv
+    |> Environment.domain
+    |> List.map (fun x ->
+        Environment.lookup x tyenv
+    )
+    |> List.map (eftv_polyty kenv)
+    |> MySet.from_list
+    |> MySet.bigunion
+  in
+  Misc.until_fix ftv_tyenv (fun eftv ->
+    eftv
+    |> MySet.map (fun tv ->
+        let k = try Environment.lookup tv kenv with _ -> KUniv in
+        freevar_kind k
+      )
+    |> MySet.bigunion
+    |> MySet.union eftv
+  )
+
+(* Cls(K, T, t) = (K', pt) *)
+let closure kenv tyenv ty =
+  let ids =
+    MySet.diff (eftv_ty kenv ty) (eftv_tyenv kenv tyenv)
+    |> MySet.to_list
+  in
+  let xs =
+    ids
+    |> List.map (fun x -> (x, Environment.lookup x kenv))
+  in
+  let kenv' = List.fold_left (fun kenv id ->
+    Environment.remove id kenv
+  ) kenv ids in
+  (kenv', Forall (xs, ty))

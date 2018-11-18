@@ -18,6 +18,7 @@ SOURCES = $(addprefix $(SRCDIR)/,\
 					explicitlyTyped.ml \
 					implementation.ml \
 					subst.ml \
+					unify.ml \
 					infer.ml \
 					compiler.ml \
 					typechecker.ml \

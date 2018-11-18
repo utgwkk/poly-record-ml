@@ -9,6 +9,7 @@ TESTS = \
 				test/infer_test.ml \
 				test/entrypoint.ml
 SOURCES = $(addprefix $(SRCDIR)/,\
+					misc.ml \
 					syntax.ml \
 					environment.ml environment.mli \
 					mySet.ml mySet.mli \

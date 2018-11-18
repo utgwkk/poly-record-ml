@@ -71,7 +71,7 @@ let rec unify eqs kenv subst ksubst =
   match eqs with
   | [] -> (kenv, subst)
   | (t1, t2) :: rest ->
-      if ty_eq t1 t2 then unify rest kenv subst ksubst (* (I) *)
+      if t1 = t2 then unify rest kenv subst ksubst (* (I) *)
       else match t1, t2 with
       | TRecord xs, TRecord ys -> (* (V) *)
           if dom_eq xs ys then
@@ -406,7 +406,7 @@ let start exp =
     |> List.sort_uniq (fun (tv1, k1) (tv2, k2) ->
         if MySet.member tv2 (freevar_kind k1) then 1
         else if MySet.member tv1 (freevar_kind k2) then -1
-        else if tv1 = tv2 && kind_eq k1 k2 then 0
+        else if tv1 = tv2 && k1 = k2 then 0
         else if tv1 > tv2 then 1
         else if tv1 < tv2 then -1
         else 0

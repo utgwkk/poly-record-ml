@@ -224,15 +224,10 @@ let freevar_tyenv tyenv =
   ) tyenv MySet.empty
   |> MySet.bigunion
 
-let rec until_fix old f =
-  let next = f old in
-  if old = next then old
-  else until_fix next f
-
 (* EFTV(kenv, ty) *)
 let eftv_ty kenv ty =
   let ftv_ty = freevar_ty ty in
-  until_fix ftv_ty (fun eftv ->
+  Misc.until_fix ftv_ty (fun eftv ->
     eftv
     |> MySet.map (fun tv ->
         let k = Environment.lookup tv kenv in
@@ -245,7 +240,7 @@ let eftv_ty kenv ty =
 (* EFTV(kenv, polyty) *)
 let eftv_polyty kenv pt =
   let ftv_ty = freevar_polyty pt in
-  until_fix ftv_ty (fun eftv ->
+  Misc.until_fix ftv_ty (fun eftv ->
     eftv
     |> MySet.map (fun tv ->
         let k = try Environment.lookup tv kenv with _ -> KUniv in
@@ -267,7 +262,7 @@ let eftv_tyenv kenv tyenv =
     |> MySet.from_list
     |> MySet.bigunion
   in
-  until_fix ftv_tyenv (fun eftv ->
+  Misc.until_fix ftv_tyenv (fun eftv ->
     eftv
     |> MySet.map (fun tv ->
         let k = try Environment.lookup tv kenv with _ -> KUniv in
@@ -506,7 +501,7 @@ let start exp =
   reset_counter ();
   let (kenv, _, exp, pty) = infer Environment.empty Environment.empty exp in
   let (kenv', subst, exp', Forall (_, ty)) =
-    until_fix (kenv, [], exp, pty) (fun (kenv, subst, exp, pty) ->
+    Misc.until_fix (kenv, [], exp, pty) (fun (kenv, subst, exp, pty) ->
       let (kenv, subst) = instantiate kenv pty in
       (List.fold_right subst_kenv subst kenv, subst, apply_subst_to_exp subst exp, apply_subst_to_polyty subst pty)
     )

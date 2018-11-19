@@ -45,15 +45,24 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
   | EBinOp (op, e1, e2) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
       let (kenv2, subst2, e2', Forall (_, t2')) = infer kenv1 (apply_subst_to_tyenv subst1 tyenv) e2 in
-      let eqs = [(t1', TInt); (t2', TInt)] in
-      let (kenv3, subst3) = Unify.start eqs kenv2 in
       begin match op with
         | Lt ->
+            let eqs = [(t1', TInt); (t2', TInt)] in
+            let (kenv3, subst3) = Unify.start eqs kenv2 in
             (kenv3,
              subst1 @ subst2 @ subst3,
              apply_subst_to_exp subst3 (ET.EBinOp (Lt, e1', e2')),
              forall_of TBool)
+        | Assign ->
+            let eqs = [(t1', TRef t2')] in
+            let (kenv3, subst3) = Unify.start eqs kenv2 in
+            (kenv3,
+             subst1 @ subst2 @ subst3,
+             apply_subst_to_exp subst3 (ET.EBinOp (Assign, e1', e2')),
+             forall_of TUnit)
         | _ ->
+            let eqs = [(t1', TInt); (t2', TInt)] in
+            let (kenv3, subst3) = Unify.start eqs kenv2 in
             (kenv3,
              subst1 @ subst2 @ subst3,
              apply_subst_to_exp subst3 (ET.EBinOp (op, e1', e2')),
@@ -158,7 +167,11 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
       ), forall_of @@ TUnit)
   | ELet (x, e1, e2) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
-      let (kenv1', pt1) = closure kenv1 (apply_subst_to_tyenv subst1 tyenv) t1' in
+      let tyenv' = apply_subst_to_tyenv subst1 tyenv in
+      let (kenv1', pt1) =
+        if is_value e1 then closure kenv1 tyenv' t1'
+        else cov_closure kenv1 tyenv' t1'
+      in
       let tyenv' =
         tyenv
         |> apply_subst_to_tyenv subst1
@@ -179,6 +192,16 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
        subst1 @ subst2 @ subst3,
        ET.EStatement (apply_subst_to_exp (subst2 @ subst3) e1', apply_subst_to_exp subst3 e2'),
        forall_of @@ apply_subst_to_ty subst3 t2')
+  | ERef e ->
+      let (kenv1, subst1, e', Forall (_, t')) = infer kenv tyenv e in
+      (kenv1, subst1, ET.ERef e', forall_of (TRef t'))
+  | EDeref e ->
+      let (kenv1, subst1, e', Forall (_, t')) = infer kenv tyenv e in
+      let tv = fresh_tyvar () in
+      let kenv' = Environment.extend tv KUniv kenv1 in
+      let eqs = [(t', TRef (TVar tv))] in
+      let (kenv2, subst2) = Unify.start eqs kenv' in
+      (kenv2, subst1 @ subst2, ET.EDeref (apply_subst_to_exp subst2 e'), forall_of (apply_subst_to_ty subst2 (TVar tv)))
 
 let canonical = function
   | KUniv -> TInt

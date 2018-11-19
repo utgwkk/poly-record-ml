@@ -13,6 +13,7 @@
 %token UNIT
 %token SEMI
 %token LARROW
+%token REF BANG COLONEQ
 
 %token <int> INTV
 %token <Syntax.id> ID
@@ -51,11 +52,15 @@ LetExpr :
 | ContinueExpr { $1 }
 
 ContinueExpr :
-  e1=LtExpr SEMI e2=ContinueExpr { EStatement (e1, e2) }
+  e1=AssignExpr SEMI e2=ContinueExpr { EStatement (e1, e2) }
 | IfExpr { $1 }
 
 IfExpr :
   IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }
+| AssignExpr { $1 }
+
+AssignExpr :
+  e1=LtExpr COLONEQ e2=AssignExpr { EBinOp (Assign, e1, e2) }
 | LtExpr { $1 }
 
 LtExpr :
@@ -68,10 +73,18 @@ PExpr :
 
 MExpr :
   e1=MExpr MULT e2=AppExpr { EBinOp (Mult, e1, e2) }
+| ConstructExpr { $1 }
+
+ConstructExpr :
+  REF e=AppExpr { ERef e }
 | AppExpr { $1 }
 
 AppExpr :
   e1=AppExpr e2=AExpr { EApp (e1, e2) }
+| DerefExpr { $1 }
+
+DerefExpr :
+  BANG e=AExpr { EDeref e }
 | AExpr { $1 }
 
 AExpr :

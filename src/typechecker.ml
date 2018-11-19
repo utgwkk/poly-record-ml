@@ -13,6 +13,7 @@ let rec substitute tvar t = function
         ts
         |> List.map (fun (l, ty) -> (l, substitute tvar t ty))
       in TRecord ts'
+  | TRef t' -> TRef (substitute tvar t t')
   | ty -> ty (* base type *)
 
 let rec instantiate (Forall (ys, t)) = function
@@ -63,6 +64,8 @@ let rec type_check kenv tyenv = function
                   else raise Typecheck_failed
         | Lt -> if t1 = TInt && t2 = TInt then forall_of TBool
                 else raise Typecheck_failed
+        | Assign -> if t1 = TRef t2 then forall_of TUnit
+                    else raise Typecheck_failed
       end
   | EIfThenElse (e1, e2, e3) ->
       let (Forall (_, t1)) = type_check kenv tyenv e1 in
@@ -95,7 +98,10 @@ let rec type_check kenv tyenv = function
       in
       let pt = Forall (xs, t) in
       let (Forall (_, t')) = type_check kenv' tyenv e in
-      let (kenv'', pt') = closure kenv' tyenv t' in
+      let (kenv'', pt') =
+        if ExplicitlyTyped.is_value e then closure kenv' tyenv t'
+        else cov_closure kenv' tyenv t'
+      in
       if kenv <> kenv'' || pt <> pt' then raise Typecheck_failed
       else pt
   | ELet (x, pt, e1, e2) ->
@@ -138,6 +144,15 @@ let rec type_check kenv tyenv = function
       ignore (type_check kenv tyenv e1);
       let (Forall (_, t2)) = type_check kenv tyenv e2 in
       forall_of t2
+  | ERef e ->
+      let (Forall (_, t)) = type_check kenv tyenv e in
+      forall_of (TRef t)
+  | EDeref e ->
+      let (Forall (_, t)) = type_check kenv tyenv e in
+      begin match t with
+          | TRef t' -> forall_of t'
+          | _ -> raise Typecheck_failed
+      end
 
 (* entrypoint *)
 let start kenv exp = type_check kenv Environment.empty exp

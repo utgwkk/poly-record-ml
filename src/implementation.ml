@@ -13,6 +13,7 @@ type ty =
   | TUnit
   | TFun of ty * ty
   | TRecord of (label * ty) list
+  | TRef of ty
   | TIdxFun of idxty list * ty
 and idxty = label * ty
 and kind =
@@ -32,6 +33,7 @@ let substitute subs t =
         TRecord xs'
     | TIdxFun (xs, t') ->
         TIdxFun (xs, inner (tv, t) t')
+    | TRef t -> TRef (inner (tv, t) t)
     | t -> t
   in List.fold_right inner subs t
 
@@ -68,6 +70,8 @@ type exp =
   | EIdxAbs of idxvar * exp
   | EIdxApp of exp * idx
   | EStatement of exp * exp
+  | ERef of exp
+  | EDeref of exp
 
 type value =
   | VInt of int
@@ -76,6 +80,7 @@ type value =
   | VProc of id * exp * env * idxenv
   | VArray of value array
   | VIdxAbs of idxvar * exp * env
+  | VRef of value ref
 
 and env = (id, value) Environment.t
 
@@ -120,6 +125,10 @@ let rec string_of_exp = function
       Printf.sprintf "EIdxApp (%s, %s)" (string_of_exp e) (string_of_idx i)
   | EStatement (e1, e2) ->
       Printf.sprintf "EStatement (%s, %s)" (string_of_exp e1) (string_of_exp e2)
+  | ERef e ->
+      Printf.sprintf "ERef (%s)" (string_of_exp e)
+  | EDeref e ->
+      Printf.sprintf "EDeref (%s)" (string_of_exp e)
 
 let rec string_of_value = function
   | VInt i -> string_of_int i
@@ -130,3 +139,4 @@ let rec string_of_value = function
       let xs = Array.to_list arr in
       "{" ^ String.concat ", " (List.map string_of_value xs) ^ "}"
   | VIdxAbs _ -> "<ifun>"
+  | VRef _ -> "<ref>"

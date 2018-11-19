@@ -32,6 +32,7 @@
 <capital> ::= ['A' - 'Z']
 <digit> ::= ['0' - '9']
 <boolean> ::= "true" | "false"
+<op> ::= "+" | "*" | "<"
 <record_body> ::= <record_field> ("," <record_field>)*
 <field> ::= <label> "=" <term>
 <label> ::= <variable>

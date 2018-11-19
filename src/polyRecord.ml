@@ -247,3 +247,44 @@ let closure kenv tyenv ty =
     Environment.remove id kenv
   ) kenv ids in
   (kenv', Forall (xs, ty))
+
+(* Dangerous variables *)
+let rec dftv = function
+  | TFun (t1, t2) -> MySet.union (freevar_ty t1) (dftv t2)
+  | TRecord xs ->
+      List.fold_left (fun ftv (_, t) ->
+        MySet.union ftv (dftv t)
+      ) MySet.empty xs
+  | TRef t -> freevar_ty t
+  | _ -> MySet.empty
+
+let rec is_value = function
+  | EVar _
+  | EInt _
+  | EBool _
+  | EBinOp _
+  | EIfThenElse _
+  | EAbs _
+  | EUnitAbs _
+  | ERecordGet _
+  | ERecordModify _
+  | EDeref _
+    -> true
+  | ERecord xs ->
+      List.for_all (fun (_, e) -> is_value e) xs
+  | _ -> false
+
+(* CovCls(K, T, t) = (K', pt) *)
+let cov_closure kenv tyenv ty =
+  let ids =
+    MySet.diff (MySet.diff (eftv_ty kenv ty) (dftv ty)) (eftv_tyenv kenv tyenv)
+    |> MySet.to_list
+  in
+  let xs =
+    ids
+    |> List.map (fun x -> (x, Environment.lookup x kenv))
+  in
+  let kenv' = List.fold_left (fun kenv id ->
+    Environment.remove id kenv
+  ) kenv ids in
+  (kenv', Forall (xs, ty))

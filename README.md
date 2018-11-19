@@ -43,3 +43,4 @@
 ## References
 
 - Ohori, A. A polymorphic record calculus and its compilation. TOPLAS, 1995. https://dl.acm.org/citation.cfm?id=218572
+- Garrigue, J. Relaxing the Value Restriction. In International Symposium on Functional and Logic Programming, 2004. http://caml.inria.fr/pub/papers/garrigue-value_restriction-fiwflp04.pdf

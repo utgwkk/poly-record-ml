@@ -43,3 +43,4 @@
 ## References
 
 - Ohori, A. A polymorphic record calculus and its compilation. TOPLAS, 1995. https://dl.acm.org/citation.cfm?id=218572
+- Wright, A. K. Simple imperative polymorphism. Lisp and Symbolic Computation, 1995. https://pdfs.semanticscholar.org/fd1d/87c648622ebbc7f086b26c23a947889bb90d.pdf

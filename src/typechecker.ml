@@ -98,7 +98,10 @@ let rec type_check kenv tyenv = function
       in
       let pt = Forall (xs, t) in
       let (Forall (_, t')) = type_check kenv' tyenv e in
-      let (kenv'', pt') = closure kenv' tyenv t' in
+      let (kenv'', pt') =
+        if ExplicitlyTyped.is_value e then closure kenv' tyenv t'
+        else cov_closure kenv' tyenv t'
+      in
       if kenv <> kenv'' || pt <> pt' then raise Typecheck_failed
       else pt
   | ELet (x, pt, e1, e2) ->

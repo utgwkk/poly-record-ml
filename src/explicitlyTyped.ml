@@ -25,6 +25,21 @@ type exp =
   | ERef of exp
   | EDeref of exp
 
+let is_value = function
+  | EPolyInst _
+  | EInt _
+  | EBool _
+  | EBinOp _
+  | EIfThenElse _
+  | EAbs _
+  | EUnitAbs _
+  | ERecord _
+  | ERecordGet _
+  | ERecordModify _
+  | EDeref _
+    -> true
+  | _ -> false
+
 let rec string_of_exp = function
   | EPolyInst (x, xs) ->
       let xs' =

@@ -51,15 +51,11 @@ LetExpr :
 | ContinueExpr { $1 }
 
 ContinueExpr :
-  e1=AssignExpr SEMI e2=ContinueExpr { EStatement (e1, e2) }
+  e1=LtExpr SEMI e2=ContinueExpr { EStatement (e1, e2) }
 | IfExpr { $1 }
 
 IfExpr :
   IF e1=Expr THEN e2=Expr ELSE e3=Expr { EIfThenElse (e1, e2, e3) }
-| AssignExpr { $1 }
-
-AssignExpr :
-  e1=AExpr DOT l=ID LARROW e2=LtExpr { ERecordAssign (e1, l, e2) }
 | LtExpr { $1 }
 
 LtExpr :

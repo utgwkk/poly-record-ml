@@ -93,9 +93,11 @@ let rec type_check kenv tyenv = function
           Environment.extend t k env
         ) kenv xs
       in
+      let pt = Forall (xs, t) in
       let (Forall (_, t')) = type_check kenv' tyenv e in
-      if t <> t' then raise Typecheck_failed
-      else Forall (xs, t')
+      let (kenv'', pt') = closure kenv' tyenv t' in
+      if kenv <> kenv'' || pt <> pt' then raise Typecheck_failed
+      else pt
   | ELet (x, pt, e1, e2) ->
       let pt' = type_check kenv tyenv e1 in
       if pt <> pt' then raise Typecheck_failed

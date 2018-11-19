@@ -214,14 +214,9 @@ let eftv_polyty kenv pt =
 (* EFTV(kenv, tyenv) *)
 let eftv_tyenv kenv tyenv =
   let ftv_tyenv =
-    tyenv
-    |> Environment.domain
-    |> List.map (fun x ->
-        Environment.lookup x tyenv
-    )
-    |> List.map (eftv_polyty kenv)
-    |> MySet.from_list
-    |> MySet.bigunion
+    Environment.fold_right (fun pt set ->
+      MySet.union set (eftv_polyty kenv pt)
+    ) tyenv MySet.empty
   in
   Misc.until_fix ftv_tyenv (fun eftv ->
     eftv

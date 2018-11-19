@@ -74,6 +74,9 @@ let rec calc_binop op lhs rhs = match (op, lhs, rhs) with
   | Plus, VInt i1, VInt i2 -> VInt (i1 + i2)
   | Mult, VInt i1, VInt i2 -> VInt (i1 * i2)
   | Lt, VInt i1, VInt i2 -> VBool (i1 < i2)
+  | Assign, VRef r1, r2 ->
+      r1 := r2;
+      VUnit
   | _ -> runtime_error "both operands must be integer"
 
 let rec eval (env : env) (idxenv : idxenv) = function
@@ -154,6 +157,15 @@ let rec eval (env : env) (idxenv : idxenv) = function
   | EStatement (e1, e2) ->
       ignore (eval env idxenv e1);
       eval env idxenv e2
+  | ERef e ->
+      let v = eval env idxenv e in
+      VRef (ref v)
+  | EDeref e ->
+      let v = eval env idxenv e in
+      begin match v with
+        | VRef r -> !r
+        | _ -> runtime_error "not a reference"
+      end
 
 (* entrypoint *)
 let start exp = eval Environment.empty Environment.empty exp

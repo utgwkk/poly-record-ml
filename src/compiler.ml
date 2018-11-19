@@ -55,6 +55,7 @@ let rec monotycon = function
         |> List.map (fun (l, t) -> (l, monotycon t))
       in
       Impl.TRecord ts'
+  | PL.TRef t -> Impl.TRef (monotycon t)
 
 let kcon = function
   | PL.KUniv -> Impl.KUniv
@@ -186,6 +187,12 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       let e1' = compile lbenv tyenv e1 in
       let e2' = compile lbenv tyenv e2 in
       Impl.EStatement (e1', e2')
+  | ET.ERef e ->
+      let e' = compile lbenv tyenv e in
+      Impl.ERef e'
+  | ET.EDeref e ->
+      let e' = compile lbenv tyenv e in
+      Impl.EDeref e'
 
 (* entrypoint *)
 let start kenv exp =

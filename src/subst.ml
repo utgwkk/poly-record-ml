@@ -15,6 +15,7 @@ let rec subst_ty t (tv, ty) = match t with
         xs
         |> List.map (fun (l, t) -> (l, subst_ty t (tv, ty)))
       in TRecord xs'
+  | TRef t -> TRef (subst_ty t (tv, ty))
   | t -> t
 
 (* [ty/tyvar]S *)
@@ -99,6 +100,8 @@ let rec apply_subst_to_exp subs = function
         l,
         apply_subst_to_exp subs e2
       )
+  | ET.ERef e -> ET.ERef (apply_subst_to_exp subs e)
+  | ET.EDeref e -> ET.EDeref (apply_subst_to_exp subs e)
   | e -> e
 
 (* S(k) *)

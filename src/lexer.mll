@@ -9,6 +9,7 @@
     ("in", IN);
     ("let", LET);
     ("modify", MODIFY);
+    ("ref", REF);
     ("then", THEN);
     ("true", TRUE);
   ] |> List.sort compare
@@ -37,6 +38,8 @@ rule main = parse
   | "+" { PLUS }
   | "*" { MULT }
   | "<" { LT }
+  | "!" { BANG }
+  | ":=" { COLONEQ }
   | ident
     {
       let id = Lexing.lexeme lexbuf in

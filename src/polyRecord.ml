@@ -7,6 +7,7 @@ type ty =
   | TUnit
   | TFun of ty * ty
   | TRecord of (label * ty) list
+  | TRef of ty
 
 and kind =
   | KUniv
@@ -30,6 +31,8 @@ type exp =
   | ERecordModify of exp * label * exp
   | ERecordAssign of exp * label * exp
   | EStatement of exp * exp
+  | ERef of exp
+  | EDeref of exp
 
 let rec string_of_ty = function
   | TVar i -> "TVar " ^ string_of_int i
@@ -43,6 +46,7 @@ let rec string_of_ty = function
         |> List.map (fun (l, t) -> Printf.sprintf "\"%s\", %s" l (string_of_ty t))
       in
       Printf.sprintf "TRecord [%s]" (String.concat "; " xs')
+  | TRef t -> Printf.sprintf "TRef (%s)" (string_of_ty t)
 
 let rec string_of_kind = function
   | KUniv -> "KUniv"
@@ -88,6 +92,10 @@ let pp_polyty (Forall (bs, t)) =
             |> List.map (fun (l, t) -> Printf.sprintf "%s : %s" l (pp_ty t))
           in
           Printf.sprintf "{%s}" (String.concat ", " xs')
+      | TRef t -> begin match t with
+          | TFun _ -> Printf.sprintf "(%s) ref" (pp_ty' t)
+          | _ -> Printf.sprintf "%s ref" (pp_ty' t)
+      end
     in pp_ty' t
   and pp_kind = function
     | KUniv -> ""
@@ -132,12 +140,17 @@ let rec string_of_exp = function
       Printf.sprintf "ERecordAssign (%s, \"%s\", %s)" (string_of_exp e1) l (string_of_exp e2)
   | EStatement (e1, e2) ->
       Printf.sprintf "EStatement (%s, %s)" (string_of_exp e1) (string_of_exp e2)
+  | ERef e ->
+      Printf.sprintf "ERef (%s)" (string_of_exp e)
+  | EDeref e ->
+      Printf.sprintf "EDeref (%s)" (string_of_exp e)
 
 (* tyvar \in FTV(ty) *)
 let rec ftv tv = function
   | TVar tv' -> tv = tv'
   | TFun (t1, t2) -> ftv tv t1 || ftv tv t2
   | TRecord xs -> List.exists (fun (_, t) -> ftv tv t) xs
+  | TRef t -> ftv tv t
   | _ -> false
 
 (* FTV(ty) *)
@@ -148,6 +161,7 @@ let rec freevar_ty = function
       List.fold_left (fun ftv (_, t) ->
         MySet.union ftv (freevar_ty t)
       ) MySet.empty xs
+  | TRef t -> freevar_ty t
   | _ -> MySet.empty
 
 (* FTV(k) *)

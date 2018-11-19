@@ -80,6 +80,9 @@ let rec unify eqs kenv subst ksubst =
       | TFun (t11, t12), TFun (t21, t22) -> (* (IX) *)
           let eqs' = (t11, t21) :: (t12, t22) :: rest in
           unify eqs' kenv subst ksubst
+      | TRef t1', TRef t2' ->
+          let eqs' = (t1', t2') :: rest in
+          unify eqs' kenv subst ksubst
       | TVar tv1, TVar tv2 ->
           let k1 = Environment.lookup tv1 kenv in
           let k2 = Environment.lookup tv2 kenv in

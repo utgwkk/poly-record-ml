@@ -23,6 +23,8 @@
          | <term> "." <label>
          | "modify" "(" <term> "," <label> "," <term> ")"
          | <term> ";" <term>
+         | "ref" <term>
+         | "!" <term>
 <variable> ::= <small> | <alphanum>+
 <alphanum> ::= <alphabet> | <number> | ['_' '\'']
 <integer> ::= '-'? <number>
@@ -32,7 +34,7 @@
 <capital> ::= ['A' - 'Z']
 <digit> ::= ['0' - '9']
 <boolean> ::= "true" | "false"
-<op> ::= "+" | "*" | "<"
+<op> ::= "+" | "*" | "<" | ":="
 <record_body> ::= <record_field> ("," <record_field>)*
 <field> ::= <label> "=" <term>
 <label> ::= <variable>

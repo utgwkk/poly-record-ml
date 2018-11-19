@@ -22,6 +22,8 @@ type exp =
   | ERecordModify of exp * ty * label * exp
   | ERecordAssign of exp * ty * label * exp
   | EStatement of exp * exp
+  | ERef of exp
+  | EDeref of exp
 
 let rec string_of_exp = function
   | EPolyInst (x, xs) ->
@@ -59,3 +61,7 @@ let rec string_of_exp = function
       Printf.sprintf "ERecordAssign (%s, %s, \"%s\", %s)" (string_of_exp e1) (PolyRecord.string_of_ty t) l (string_of_exp e2)
   | EStatement (e1, e2) ->
       Printf.sprintf "EStatement (%s, %s)" (string_of_exp e1) (string_of_exp e2)
+  | ERef e ->
+      Printf.sprintf "ERef (%s)" (string_of_exp e)
+  | EDeref e ->
+      Printf.sprintf "EDeref (%s)" (string_of_exp e)

@@ -270,28 +270,6 @@ let tests = "Typechecker_test">:::[
         ) in
         assert_raises Typecheck_failed (fun () -> start input)
       );
-      "descriptive_update_soundness">::(fun ctxt ->
-        (*
-           let (rf:forall 't1.{g:'t1->'t1}) =
-             Poly({g = fun (x:'t1) -> x}:forall 't1.'t1->'t1)
-           in
-           (rf int):{g:int->int}.g = fun (x:int) -> x + 1;
-           (rf bool):{g:bool->bool}.g true
-         *)
-        todo "It must be rejected but not now...";
-        let input =
-          ELet ("rf",
-                Forall ([1, KUniv], TRecord ["g", TFun (TVar 1, TVar 1)]),
-                EPolyGen (ERecord [("g", EAbs ("x", TVar 1, EPolyInst ("x", [])))],
-                          Forall ([1, KUniv], TRecord ["g", TFun (TVar 1, TVar 1)])),
-                EStatement (
-                  ERecordAssign (EPolyInst ("rf", [TInt]), TRecord ["g", TFun (TInt, TInt)], "g", EAbs ("x", TInt, EBinOp (Plus, EPolyInst ("x", []), EInt 1))),
-                  EApp (ERecordGet (EPolyInst ("rf", [TBool]), TRecord ["g", TFun (TBool, TBool)], "g"), EBool true)
-                )
-          )
-        in
-        assert_raises Typecheck_failed (fun () -> start input)
-      );
     ]
   ]
 ]

@@ -21,7 +21,6 @@
          | "let" <variable> (<variable>+ | "()")? "=" <term> "in" <term>
          | "{" <record> "}"
          | <term> "." <label>
-         | <term> "." <label> "<-" <term>
          | "modify" "(" <term> "," <label> "," <term> ")"
          | <term> ";" <term>
 <variable> ::= <small> | <alphanum>+

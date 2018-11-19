@@ -109,38 +109,6 @@ let tests = "Typechecker_test">:::[
         let expected = Forall ([], TRecord [("a", TInt); ("b", TInt); ("c", TInt)]) in
         assert_equal expected (start input)
       );
-      "Poly(1, forall t1::U.t2::U.t3::U.int) : forall t1::U.t2::U.t3::U.int">::(fun ctxt ->
-        let input = EPolyGen (
-          EInt 1,
-          Forall ([1, KUniv; 2, KUniv; 3, KUniv], TInt)
-        ) in
-        let expected = Forall ([(1, KUniv); (2, KUniv); (3, KUniv)], TInt) in
-        assert_equal expected (start input)
-      );
-      "Poly((1, forall t1::{{a:int, b:int}}.int) : forall t1::{{a:int, b:int}}.int">::(fun ctxt ->
-        let input = EPolyGen (
-          EInt 1,
-          Forall ([1, KRecord [("a", TInt); ("b", TInt)]], TInt)
-        ) in
-        let expected = Forall ([(1, KRecord [("a", TInt); ("b", TInt)])], TInt) in
-        assert_equal expected (start input)
-      );
-      "Poly((1, forall t1::{{a:int, b:int}}.forall t2::{{a:int}}.int)">::(fun ctxt ->
-        let input = EPolyGen (
-          EInt 1,
-          Forall ([
-            1, KRecord [("a", TInt); ("b", TInt)];
-            2, KRecord [("a", TInt)];
-          ], TInt)
-        ) in
-        let expected =
-          Forall ([
-            1, KRecord [("a", TInt); ("b", TInt)];
-            2, KRecord [("a", TInt)];
-          ], TInt)
-        in
-        assert_equal expected (start input)
-      );
       "let_and_polyinst_no_type_application">::(fun ctxt ->
         (* let (x:{a:int, b:int}) = {a=1, b=2}
          * in x
@@ -275,6 +243,30 @@ let tests = "Typechecker_test">:::[
         let input = ELet (
           "x", Forall ([1, KUniv], TVar 1),
           EInt 1, EPolyInst ("x", [TInt])
+        ) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
+      "Poly(1, forall t1::U.t2::U.t3::U.int) : forall t1::U.t2::U.t3::U.int">::(fun ctxt ->
+        let input = EPolyGen (
+          EInt 1,
+          Forall ([1, KUniv; 2, KUniv; 3, KUniv], TInt)
+        ) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
+      "Poly((1, forall t1::{{a:int, b:int}}.int) : forall t1::{{a:int, b:int}}.int">::(fun ctxt ->
+        let input = EPolyGen (
+          EInt 1,
+          Forall ([1, KRecord [("a", TInt); ("b", TInt)]], TInt)
+        ) in
+        assert_raises Typecheck_failed (fun () -> start input)
+      );
+      "Poly((1, forall t1::{{a:int, b:int}}.forall t2::{{a:int}}.int)">::(fun ctxt ->
+        let input = EPolyGen (
+          EInt 1,
+          Forall ([
+            1, KRecord [("a", TInt); ("b", TInt)];
+            2, KRecord [("a", TInt)];
+          ], TInt)
         ) in
         assert_raises Typecheck_failed (fun () -> start input)
       );

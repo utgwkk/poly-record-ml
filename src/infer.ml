@@ -186,12 +186,10 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
   | EStatement (e1, e2) ->
       let (kenv1, subst1, e1', Forall (_, t1')) = infer kenv tyenv e1 in
       let (kenv2, subst2, e2', Forall (_, t2')) = infer kenv1 (apply_subst_to_tyenv subst1 tyenv) e2 in
-      let eqs = [(t1', TUnit)] in
-      let (kenv3, subst3) = Unify.start eqs kenv2 in
-      (kenv3,
-       subst1 @ subst2 @ subst3,
-       ET.EStatement (apply_subst_to_exp (subst2 @ subst3) e1', apply_subst_to_exp subst3 e2'),
-       forall_of @@ apply_subst_to_ty subst3 t2')
+      (kenv2,
+       subst1 @ subst2,
+       ET.EStatement (apply_subst_to_exp subst2 e1', e2'),
+       forall_of t2')
   | ERef e ->
       let (kenv1, subst1, e', Forall (_, t')) = infer kenv tyenv e in
       (kenv1, subst1, ET.ERef e', forall_of (TRef t'))

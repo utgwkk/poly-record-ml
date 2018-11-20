@@ -58,6 +58,8 @@ let rec apply_subst_to_exp subs = function
       )
   | ET.EAbs (x, t, e) ->
       ET.EAbs (x, apply_subst_to_ty subs t, apply_subst_to_exp subs e)
+  | ET.EUnitAbs e ->
+      ET.EUnitAbs (apply_subst_to_exp subs e)
   | ET.EApp (e1, e2) ->
       ET.EApp (
         apply_subst_to_exp subs e1,
@@ -102,6 +104,8 @@ let rec apply_subst_to_exp subs = function
       )
   | ET.ERef e -> ET.ERef (apply_subst_to_exp subs e)
   | ET.EDeref e -> ET.EDeref (apply_subst_to_exp subs e)
+  | ET.EStatement (e1, e2) ->
+      ET.EStatement (apply_subst_to_exp subs e1, apply_subst_to_exp subs e2)
   | e -> e
 
 (* S(k) *)

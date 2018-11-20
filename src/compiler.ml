@@ -48,9 +48,7 @@ let idxset_kenv kenv =
  * *)
 let rec tycon (PL.Forall (xs, t)) =
   let idxsets = idxset xs in
-  match idxsets with
-  | [] -> PL.Forall (xs, t)
-  | _ -> PL.Forall (xs, PL.TIdxFun (idxsets, t))
+  PL.Forall (xs, PL.TIdxFun (idxsets, t))
 
 let rec compile (lbenv : Impl.lbenv) tyenv = function
   | ET.EPolyInst (x, xs) ->

@@ -23,7 +23,7 @@ type exp =
   | ERef of exp
   | EDeref of exp
 
-let is_value = function
+let rec is_value = function
   | EPolyInst _
   | EInt _
   | EBool _
@@ -31,11 +31,12 @@ let is_value = function
   | EIfThenElse _
   | EAbs _
   | EUnitAbs _
-  | ERecord _
   | ERecordGet _
   | ERecordModify _
   | EDeref _
     -> true
+  | ERecord xs ->
+      List.for_all (fun (_, e) -> is_value e) xs
   | _ -> false
 
 let rec string_of_exp = function

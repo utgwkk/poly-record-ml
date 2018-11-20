@@ -257,13 +257,13 @@ let closure kenv tyenv ty =
   (kenv', Forall (xs, ty))
 
 (* Dangerous variables *)
-let rec dftv = function
-  | TFun (t1, t2) -> MySet.union (freevar_ty t1) (dftv t2)
+let rec edftv kenv = function
+  | TFun (t1, t2) -> MySet.union (eftv_ty kenv t1) (edftv kenv t2)
   | TRecord xs ->
       List.fold_left (fun ftv (_, t) ->
-        MySet.union ftv (dftv t)
+        MySet.union ftv (edftv kenv t)
       ) MySet.empty xs
-  | TRef t -> freevar_ty t
+  | TRef t -> eftv_ty kenv t
   | _ -> MySet.empty
 
 let rec is_value = function
@@ -285,7 +285,7 @@ let rec is_value = function
 (* CovCls(K, T, t) = (K', pt) *)
 let cov_closure kenv tyenv ty =
   let ids =
-    MySet.diff (MySet.diff (eftv_ty kenv ty) (dftv ty)) (eftv_tyenv kenv tyenv)
+    MySet.diff (MySet.diff (eftv_ty kenv ty) (edftv kenv ty)) (eftv_tyenv kenv tyenv)
     |> MySet.to_list
   in
   let xs =

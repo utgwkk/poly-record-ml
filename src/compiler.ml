@@ -17,7 +17,7 @@ let fresh_idxvar () =
 let idxset_kind tv = function
   | PL.KUniv -> []
   | PL.KRecord xs ->
-      List.map (fun (l, _) -> (l, Impl.TVar tv)) xs
+      List.map (fun (l, _) -> (l, PL.TVar tv)) xs
 
 (* IdxSet(F) where k = {{F}}*)
 let idxset xs =
@@ -42,54 +42,26 @@ let idxset_kenv kenv =
       Environment.extend (l, t) (Impl.IVar (fresh_idxvar())) env
     ) Environment.empty
 
-(* (\tau)^* = \tau *)
-let rec monotycon = function
-  | PL.TVar tv -> Impl.TVar tv
-  | PL.TInt -> Impl.TInt
-  | PL.TBool -> Impl.TBool
-  | PL.TUnit -> Impl.TUnit
-  | PL.TFun (t1, t2) -> Impl.TFun (monotycon t1, monotycon t2)
-  | PL.TRecord ts ->
-      let ts' =
-        ts
-        |> List.map (fun (l, t) -> (l, monotycon t))
-      in
-      Impl.TRecord ts'
-  | PL.TRef t -> Impl.TRef (monotycon t)
-
-let kcon = function
-  | PL.KUniv -> Impl.KUniv
-  | PL.KRecord xs ->
-      let xs' =
-        xs
-        |> List.map (fun (l, t) -> (l, monotycon t))
-      in
-      Impl.KRecord xs'
-
 (* (forall t_1::k_1. \cdots forall t_n::k_n.\tau)^*
  * = forall t_1::k_1. \cdots forall t_n::k_n.
  *   idx(l_1, t^'_1) => ... => idx(l_n, t^'_n) => \tau
  * *)
 let rec tycon (PL.Forall (xs, t)) =
   let idxsets = idxset xs in
-  let xs' =
-    xs
-    |> List.map (fun (tv, k) -> (tv, kcon k))
-  in
   match idxsets with
-  | [] -> Impl.Forall (xs', monotycon t)
-  | _ -> Impl.Forall (xs', Impl.TIdxFun (idxsets, monotycon t))
+  | [] -> PL.Forall (xs, t)
+  | _ -> PL.Forall (xs, PL.TIdxFun (idxsets, t))
 
 let rec compile (lbenv : Impl.lbenv) tyenv = function
   | ET.EPolyInst (x, xs) ->
-      let (Impl.Forall (ys, t)) = Environment.lookup x tyenv in
+      let (PL.Forall (ys, t)) = Environment.lookup x tyenv in
       begin match t with
-        | Impl.TIdxFun (zs, _) ->
+        | PL.TIdxFun (zs, _) ->
             let subs =
-              List.map2 (fun (tv, _) ty -> (tv, monotycon ty)) ys xs
+              List.map2 (fun (tv, _) ty -> (tv, ty)) ys xs
             in
             let idxs = List.map (fun (l, t) ->
-              let t' = Impl.substitute subs t in
+              let t' = Subst.apply_subst_to_ty subs t in
               try Impl.INat (Impl.idx_value l t')
               with Impl.Undefined_index_value ->
                 Environment.lookup (l, t') lbenv
@@ -116,7 +88,7 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       let e3' = compile lbenv tyenv e3 in
       Impl.EIfThenElse (e1', e2', e3')
   | ET.EAbs (x, t, e) ->
-      let t' = Impl.Forall ([], monotycon t) in
+      let t' = PL.Forall ([], t) in
       let tyenv' = Environment.extend x t' tyenv in
       let e' = compile lbenv tyenv' e in
       Impl.EAbs (x, e')
@@ -157,29 +129,26 @@ let rec compile (lbenv : Impl.lbenv) tyenv = function
       Impl.EArray xs'
   | ET.ERecordGet (e1, t, l) ->
       let e1' = compile lbenv tyenv e1 in
-      let t' = monotycon t in
       let idx =
-        try Impl.INat (Impl.idx_value l t')
+        try Impl.INat (Impl.idx_value l t)
         with Impl.Undefined_index_value ->
-          Environment.lookup (l, t') lbenv
+          Environment.lookup (l, t) lbenv
       in Impl.EArrayGet (e1', idx)
   | ET.ERecordModify (e1, t, l, e2) ->
       let e1' = compile lbenv tyenv e1 in
-      let t' = monotycon t in
       let idx =
-        try Impl.INat (Impl.idx_value l t')
+        try Impl.INat (Impl.idx_value l t)
         with Impl.Undefined_index_value ->
-          Environment.lookup (l, t') lbenv
+          Environment.lookup (l, t) lbenv
       in
       let e2' = compile lbenv tyenv e2 in
       Impl.EArrayModify (e1', idx, e2')
   | ET.ERecordAssign (e1, t, l, e2) ->
       let e1' = compile lbenv tyenv e1 in
-      let t' = monotycon t in
       let idx =
-        try Impl.INat (Impl.idx_value l t')
+        try Impl.INat (Impl.idx_value l t)
         with Impl.Undefined_index_value ->
-          Environment.lookup (l, t') lbenv
+          Environment.lookup (l, t) lbenv
       in
       let e2' = compile lbenv tyenv e2 in
       Impl.EArrayAssign (e1', idx, e2')

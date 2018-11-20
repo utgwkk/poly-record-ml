@@ -8,6 +8,7 @@ type ty =
   | TFun of ty * ty
   | TRecord of (label * ty) list
   | TRef of ty
+  | TIdxFun of (label * ty) list * ty
 
 and kind =
   | KUniv
@@ -47,6 +48,12 @@ let rec string_of_ty = function
       in
       Printf.sprintf "TRecord [%s]" (String.concat "; " xs')
   | TRef t -> Printf.sprintf "TRef (%s)" (string_of_ty t)
+  | TIdxFun (xs, t) ->
+      let xs' =
+        xs
+        |> List.map (fun (l, t) -> Printf.sprintf "\"%s\", %s" l (string_of_ty t))
+      in
+      Printf.sprintf "TIdxFun ([%s], %s)" (String.concat "; " xs') (string_of_ty t)
 
 let rec string_of_kind = function
   | KUniv -> "KUniv"
@@ -96,6 +103,12 @@ let pp_polyty (Forall (bs, t)) =
           | TFun _ -> Printf.sprintf "(%s) ref" (pp_ty' t)
           | _ -> Printf.sprintf "%s ref" (pp_ty' t)
       end
+      | TIdxFun (xs, t) ->
+          let xs' =
+            xs
+            |> List.map (fun (l, t) -> Printf.sprintf "idx(%s, %s)" l (pp_ty t))
+          in
+          Printf.sprintf "%s => %s" (String.concat " => " xs') (string_of_ty t)
     in pp_ty' t
   and pp_kind = function
     | KUniv -> ""

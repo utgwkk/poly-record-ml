@@ -10,16 +10,6 @@ let start = start Environment.empty
 
 let tests = "Compiler_test">:::[
   "tycon_test">:::[
-    "no_bound">::(fun ctxt ->
-      let input = PL.Forall ([], TInt) in
-      let expected = Impl.Forall ([], TInt) in
-      assert_equal expected (tycon input)
-    );
-    "universal">::(fun ctxt ->
-      let input = PL.Forall ([1, KUniv], TInt) in
-      let expected = Impl.Forall ([1, KUniv], TInt) in
-      assert_equal expected (tycon input)
-    );
     "example_in_paper">::(fun ctxt ->
       (* forall t2 :: {{a:int, b:int}}.
        * forall t3 :: {{a:t2}}.
@@ -36,13 +26,13 @@ let tests = "Compiler_test">:::[
         ], PL.TFun (PL.TVar 2, PL.TVar 3))
       in
       let expected =
-        Impl.Forall ([
-          (2, Impl.KRecord [("a", TInt); ("b", TInt)]);
-          (3, Impl.KRecord [("a", TVar 2)])
+        PL.Forall ([
+          (2, PL.KRecord [("a", TInt); ("b", TInt)]);
+          (3, PL.KRecord [("a", TVar 2)])
         ],
-        Impl.TIdxFun ([
+        PL.TIdxFun ([
           ("a", TVar 2); ("b", TVar 2); ("a", TVar 3)
-        ], Impl.TFun (TVar 2, TVar 3))
+        ], PL.TFun (TVar 2, TVar 3))
         )
       in
       assert_equal expected (tycon input)

@@ -1,41 +1,11 @@
 open Syntax
+open PolyRecord
 
 type idxvar = int
 
 type idx =
   | IVar of idxvar
   | INat of int
-
-type ty =
-  | TVar of tyvar
-  | TInt
-  | TBool
-  | TUnit
-  | TFun of ty * ty
-  | TRecord of (label * ty) list
-  | TRef of ty
-  | TIdxFun of idxty list * ty
-and idxty = label * ty
-and kind =
-  | KUniv
-  | KRecord of (label * ty) list
-
-type polyty = Forall of (tyvar * kind) list * ty
-
-type subst = (tyvar * ty) list
-
-let substitute subs t =
-  let rec inner (tv, t) = function
-    | TVar tv' -> if tv = tv' then t else TVar tv'
-    | TFun (t1, t2) -> TFun (inner (tv, t) t1, inner (tv, t) t2)
-    | TRecord xs ->
-        let xs' = List.map (fun (l, t') -> (l, inner (tv, t') t)) xs in
-        TRecord xs'
-    | TIdxFun (xs, t') ->
-        TIdxFun (xs, inner (tv, t) t')
-    | TRef t -> TRef (inner (tv, t) t)
-    | t -> t
-  in List.fold_right inner subs t
 
 exception Label_not_found of label
 exception Undefined_index_value
@@ -86,7 +56,7 @@ and env = (id, value) Environment.t
 
 and idxenv = (idxvar, idx) Environment.t
 
-type lbenv = (idxty, idx) Environment.t
+type lbenv = ((label * ty), idx) Environment.t
 
 let string_of_idx = function
   | IVar i -> "IVar " ^ string_of_int i

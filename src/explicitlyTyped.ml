@@ -3,8 +3,6 @@ open Syntax
 type ty = PolyRecord.ty
 type polyty = PolyRecord.polyty
 
-type idx = Implementation.idx
-
 type exp =
   | EPolyInst of id * ty list
   | EInt of int

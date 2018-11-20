@@ -4,6 +4,8 @@ type tyvar = int
 
 type label = string
 
+type 'a record = (label * 'a) list
+
 type binOp =
   | Plus
   | Mult

@@ -15,7 +15,7 @@ type exp =
   | EApp of exp * exp
   | EPolyGen of exp * polyty
   | ELet of id * polyty * exp * exp
-  | ERecord of (label * exp) list
+  | ERecord of exp record
   | ERecordGet of exp * ty * label
   | ERecordModify of exp * ty * label * exp
   | ERecordAssign of exp * ty * label * exp

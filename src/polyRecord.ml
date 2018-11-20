@@ -6,13 +6,13 @@ type ty =
   | TBool
   | TUnit
   | TFun of ty * ty
-  | TRecord of (label * ty) list
+  | TRecord of ty record
   | TRef of ty
   | TIdxFun of (label * ty) list * ty
 
 and kind =
   | KUniv
-  | KRecord of (label * ty) list
+  | KRecord of ty record
 
 type polyty = Forall of (tyvar * kind) list * ty
 
@@ -27,7 +27,7 @@ type exp =
   | EUnitAbs of exp
   | EApp of exp * exp
   | ELet of id * exp * exp
-  | ERecord of (label * exp) list
+  | ERecord of exp record
   | ERecordGet of exp * label
   | ERecordModify of exp * label * exp
   | ERecordAssign of exp * label * exp

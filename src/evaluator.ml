@@ -64,6 +64,16 @@ let rec subst_idx (idx, idxr) = function
           | INat i' -> INat i'
       in
       EIdxApp (e', i')
+  | EStatement (e1, e2) ->
+      let e1' = subst_idx (idx, idxr) e1 in
+      let e2' = subst_idx (idx, idxr) e2 in
+      EStatement (e1', e2')
+  | ERef e ->
+      let e' = subst_idx (idx, idxr) e in
+      ERef e'
+  | EDeref e ->
+      let e' = subst_idx (idx, idxr) e in
+      EDeref e'
   | e -> e
 
 let rec eval_idx idxenv = function

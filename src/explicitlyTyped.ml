@@ -28,15 +28,16 @@ let rec is_value = function
   | EInt _
   | EBool _
   | EBinOp _
-  | EIfThenElse _
   | EAbs _
   | EUnitAbs _
-  | ERecordGet _
-  | ERecordModify _
-  | EDeref _
     -> true
   | ERecord xs ->
       List.for_all (fun (_, e) -> is_value e) xs
+  | EDeref e
+  | ERecordGet (e, _, _)
+  | ERecordModify (_, _, _, e)
+  | EStatement (_, e) -> is_value e
+  | EIfThenElse (e1, e2, e3) -> is_value e1 && is_value e2 && is_value e3
   | _ -> false
 
 let rec string_of_exp = function

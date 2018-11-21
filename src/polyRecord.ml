@@ -256,16 +256,6 @@ let closure kenv tyenv ty =
   ) kenv ids in
   (kenv', Forall (xs, ty))
 
-(* Dangerous variables *)
-let rec edftv kenv = function
-  | TFun (t1, t2) -> MySet.union (eftv_ty kenv t1) (edftv kenv t2)
-  | TRecord xs ->
-      List.fold_left (fun ftv (_, t) ->
-        MySet.union ftv (edftv kenv t)
-      ) MySet.empty xs
-  | TRef t -> eftv_ty kenv t
-  | _ -> MySet.empty
-
 let rec is_value = function
   | EVar _
   | EInt _
@@ -282,18 +272,3 @@ let rec is_value = function
   | EStatement (_, e) -> is_value e
   | EIfThenElse (e1, e2, e3) -> is_value e1 && is_value e2 && is_value e3
   | _ -> false
-
-(* CovCls(K, T, t) = (K', pt) *)
-let cov_closure kenv tyenv ty =
-  let ids =
-    MySet.diff (MySet.diff (eftv_ty kenv ty) (edftv kenv ty)) (eftv_tyenv kenv tyenv)
-    |> MySet.to_list
-  in
-  let xs =
-    ids
-    |> List.map (fun x -> (x, Environment.lookup x kenv))
-  in
-  let kenv' = List.fold_left (fun kenv id ->
-    Environment.remove id kenv
-  ) kenv ids in
-  (kenv', Forall (xs, ty))

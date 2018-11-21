@@ -170,7 +170,7 @@ let rec infer (kenv : (tyvar, kind) Environment.t) tyenv exp = match exp with
       let tyenv' = apply_subst_to_tyenv subst1 tyenv in
       let (kenv1', pt1) =
         if is_value e1 then closure kenv1 tyenv' t1'
-        else cov_closure kenv1 tyenv' t1'
+        else (kenv1, Forall ([], t1'))
       in
       let tyenv' =
         tyenv

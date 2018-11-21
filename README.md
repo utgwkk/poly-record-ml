@@ -1,5 +1,7 @@
 # poly-record-ml
 
+[![Build Status](https://travis-ci.org/utgwkk/poly-record-ml.svg?branch=master)](https://travis-ci.org/utgwkk/poly-record-ml)
+
 ## requirements
 
 - menhir

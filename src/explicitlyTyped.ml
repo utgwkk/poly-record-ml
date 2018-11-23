@@ -45,22 +45,7 @@ let rec erase = function
   | ERef e -> PolyRecord.ERef (erase e)
   | EDeref e -> PolyRecord.EDeref (erase e)
 
-let rec is_value = function
-  | EPolyInst _
-  | EInt _
-  | EBool _
-  | EBinOp _
-  | EAbs _
-  | EUnitAbs _
-    -> true
-  | ERecord xs ->
-      List.for_all (fun (_, e) -> is_value e) xs
-  | EDeref e
-  | ERecordGet (e, _, _)
-  | ERecordModify (_, _, _, e)
-  | EStatement (_, e) -> is_value e
-  | EIfThenElse (e1, e2, e3) -> is_value e1 && is_value e2 && is_value e3
-  | _ -> false
+let is_value e = PolyRecord.is_value (erase e)
 
 let rec string_of_exp = function
   | EPolyInst (x, xs) ->

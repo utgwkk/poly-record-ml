@@ -1,13 +1,8 @@
 PACKS = oUnit
 OCAMLYACC = menhir
 SRCDIR = src
-TESTS = \
-				test/compiler_test.ml \
-				test/evaluator_test.ml \
-				test/typechecker_test.ml \
-				test/parser_test.ml \
-				test/infer_test.ml \
-				test/entrypoint.ml
+TESTDIR = test
+TESTS = $(wildcard $(TESTDIR)/*_test.ml) $(TESTDIR)/entrypoint.ml
 SOURCES = $(addprefix $(SRCDIR)/,\
 					misc.ml \
 					syntax.ml \

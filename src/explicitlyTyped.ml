@@ -23,6 +23,28 @@ type exp =
   | ERef of exp
   | EDeref of exp
 
+let rec erase = function
+  | EPolyInst (id, _) -> PolyRecord.EVar id
+  | EInt i -> PolyRecord.EInt i
+  | EBool b -> PolyRecord.EBool b
+  | EUnit -> PolyRecord.EUnit
+  | EBinOp (op, e1, e2) -> PolyRecord.EBinOp (op, erase e1, erase e2)
+  | EIfThenElse (e1, e2, e3) -> PolyRecord.EIfThenElse (erase e1, erase e2, erase e3)
+  | EAbs (id, _, e) -> PolyRecord.EAbs (id, erase e)
+  | EUnitAbs e -> PolyRecord.EUnitAbs (erase e)
+  | EApp (e1, e2) -> PolyRecord.EApp (erase e1, erase e2)
+  | EPolyGen (e, _) -> erase e
+  | ELet (id, _, e1, e2) -> PolyRecord.ELet (id, erase e1, erase e2)
+  | ERecord xs ->
+      let xs' = List.map (fun (l, e) -> (l, erase e)) xs in
+      PolyRecord.ERecord xs'
+  | ERecordGet (e, _, l) -> PolyRecord.ERecordGet (erase e, l)
+  | ERecordModify (e1, _, l, e2) -> PolyRecord.ERecordModify (erase e1, l, erase e2)
+  | ERecordAssign (e1, _, l, e2) -> PolyRecord.ERecordAssign (erase e1, l, erase e2)
+  | EStatement (e1, e2) -> PolyRecord.EStatement (erase e1, erase e2)
+  | ERef e -> PolyRecord.ERef (erase e)
+  | EDeref e -> PolyRecord.EDeref (erase e)
+
 let rec is_value = function
   | EPolyInst _
   | EInt _

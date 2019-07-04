@@ -1,37 +1,24 @@
-PACKS = oUnit
-OCAMLYACC = menhir
-SRCDIR = src
-TESTDIR = test
-TESTS = $(wildcard $(TESTDIR)/*_test.ml) $(TESTDIR)/entrypoint.ml
-SOURCES = $(addprefix $(SRCDIR)/,\
-					misc.ml \
-					syntax.ml \
-					environment.ml environment.mli \
-					mySet.ml mySet.mli \
-					evaluator.ml \
-					polyRecord.ml \
-					explicitlyTyped.ml \
-					implementation.ml \
-					subst.ml \
-					unify.ml \
-					infer.ml \
-					compiler.ml \
-					typechecker.ml \
-					parser.mly \
-					lexer.mll) \
-					$(MAIN)
-MAIN = $(SRCDIR)/main.ml
-RESULT = prog
+.PHONY: all clean byte native test test_entrypoint
+
+OCB_FLAGS = -use-ocamlfind -I src -I src/frontend
+OCB = ocamlbuild $(OCB_FLAGS)
 
 all: frontend
 
-frontend: bc
+frontend: native
 
-.PHONY: test
+native:
+	$(OCB) main.native
 
-test: MAIN = $(TESTS)
-test: OCAMLFLAGS = -g
-test: nc
-	./$(RESULT); rm $(RESULT)
+byte:
+	$(OCB) main.byte
 
-include OCamlMakefile
+clean:
+	$(OCB) -clean
+
+test: test_entrypoint
+	./entrypoint.native
+
+test_entrypoint: OCB_FLAGS = -use-ocamlfind -I src -I src/frontend -I test
+test_entrypoint:
+	$(OCB) entrypoint.native

@@ -25,6 +25,7 @@ jobs:
       run: |
         opam pin add github-actions-ci-repo `pwd` --no-action --yes
         opam install github-actions-ci-repo --deps-only --yes
+        opam install --yes ocamlbuild
 
     - name: Run tests
       run: make test

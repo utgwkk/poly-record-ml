@@ -22,7 +22,7 @@ jobs:
         ocaml -version
 
     - name: Install dependencies
-      run:
+      run: |
         opam pin add github-actions-ci-repo `pwd` --no-action --yes
         opam install github-actions-ci-repo --deps-only --yes
 

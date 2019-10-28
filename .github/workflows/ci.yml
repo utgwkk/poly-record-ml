@@ -12,20 +12,17 @@ jobs:
         sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
         opam init
         eval `opam env`
-      |
 
     - name: Set up OCaml
       run: |
         opam switch create 4.07.0
         eval `opam env`
         ocaml -version
-      |
 
     - name: Install dependencies
       run:
         opam pin add github-actions-ci-repo `pwd` --no-action --yes
         opam install github-actions-ci-repo --deps-only --yes
-      |
 
     - name: Run tests
       run: make test

@@ -12,13 +12,13 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y opam
         opam init --yes
-        eval `opam env`
+        eval `opam config env`
         opam --version
 
     - name: Set up OCaml
       run: |
         opam switch install 4.07.0
-        eval `opam env`
+        eval `opam config env`
         ocaml -version
 
     - name: Install dependencies
